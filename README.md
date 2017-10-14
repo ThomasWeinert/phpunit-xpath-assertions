@@ -1,13 +1,16 @@
-# PHPUnit Xpath Assertions
+# phpunit-xpath-assertions
 
-Xpath assertions and constraints for PHPUnit. 
+Xpath assertions and constraints for use with PHPUnit. 
 
 ## Example
 
 ```php
-class MyProjectExampleTest extends \PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Xpath\Assert as XpathAssertions;
+
+class MyProjectExampleTest extends TestCase
 {
-    use \PHPUnit\Xpath\Assert;
+    use XpathAssertions;
 
     public function testChildElementExistsInDocument()
     {
@@ -40,10 +43,13 @@ $ composer require --dev thomasweinert/phpunit-xpath-assertions
 The library provides traits that you can use to add the assertions to your TestCase.
 
 ```php
+use PHPUnit\Xpath\Assert as XpathAssertions;
+use PHPUnit\Xpath\Constraint as XpathConstraints;
+
 class MyProjectExampleTest extends \PHPUnit\Framework\TestCase
 {
-    use \PHPUnit\Xpath\Assert;
-    use \PHPUnit\Xpath\Constraint;
+    use XpathAssertions;
+    use XpathConstraints;
 }
 ```
 
