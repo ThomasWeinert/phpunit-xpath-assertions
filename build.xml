@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="phpunit-xpath-assertions" default="build">
+    <target name="build" depends="prepare"/>
+
+    <target name="clean" unless="clean.done" description="Cleanup build artifacts">
+        <delete dir="${basedir}/build"/>
+        <delete dir="${basedir}/tools"/>
+        <delete dir="${basedir}/vendor"/>
+        <delete file="${basedir}/manifest.xml.in"/>
+
+        <property name="clean.done" value="true"/>
+    </target>
+
+    <target name="prepare" unless="prepare.done" depends="install-tools" description="Prepare for build">
+        <mkdir dir="${basedir}/build"/>
+
+        <property name="prepare.done" value="true"/>
+    </target>
+
+    <target name="install-tools" unless="tools-installed" depends="-tools-installed" description="Install tools using phive">
+        <exec executable="phive" taskname="phive">
+            <arg value="install"/>
+        </exec>
+    </target>
+
+    <target name="package" depends="prepare,-get-version-number-from-git" description="Package as PHAR">
+        <copy todir="${basedir}/build" file="${basedir}/LICENSE" />
+        <copy tofile="${basedir}/build/manifest.xml" file="${basedir}/manifest.xml.in" />
+        <replace file="${basedir}/build/manifest.xml" token="@@version@@" value="${version}"/>
+        <copy todir="${basedir}/build/phpunit-xpath-assertions">
+            <fileset dir="${basedir}/src">
+                <include name="**/*" />
+            </fileset>
+        </copy>
+
+        <exec executable="${basedir}/tools/phpab" taskname="phpab">
+            <arg value="--all" />
+            <arg value="--static" />
+            <arg value="--once" />
+            <arg value="--phar" />
+            <arg value="--output" />
+            <arg path="${basedir}/build/phpunit-xpath-assertions-${version}.phar" />
+            <arg path="${basedir}/build" />
+        </exec>
+
+        <delete includeemptydirs="true">
+            <fileset dir="${basedir}/build">
+                <include name="**/*"/>
+                <exclude name="phpunit-xpath-assertions-${version}.phar"/>
+            </fileset>
+        </delete>
+
+        <exec executable="gpg" failonerror="true" taskname="gpg">
+            <arg value="--local-user"/>
+            <arg value="thomas@weinert.info"/>
+            <arg value="--armor"/>
+            <arg value="--detach-sign"/>
+            <arg path="${basedir}/build/phpunit-xpath-assertions-${version}.phar"/>
+        </exec>
+    </target>
+
+    <target name="-get-version-number-from-git">
+        <exec executable="bash" outputproperty="version" failonerror="true" dir="${basedir}">
+            <arg value="-c" />
+            <arg value="/usr/bin/git describe --abbrev=0" />
+        </exec>
+    </target>
+
+    <target name="-tools-installed">
+        <available file="${basedir}/tools" property="tools-installed" type="dir"/>
+    </target>
+</project>
+

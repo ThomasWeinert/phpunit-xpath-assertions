@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<phar xmlns="https://phar.io/xml/manifest/1.0">
+    <contains name="thomasweinert/phpunit-xpath-assertions" version="@@version@@" type="extension">
+        <extension for="phpunit/phpunit" "^6.4"/>
+    </contains>
+
+    <copyright>
+        <author name="Thomas Weinert" email="thomas@weinert.info"/>
+        <license type="BSD-3-Clause" url="https://github.com/thomasweinert/phpunit-xpath-assertions/blob/master/LICENSE"/>
+    </copyright>
+
+    <requires>
+        <php version="^7.1"/>
+    </requires>
+</phar>

@@ -1,0 +1,22 @@
+{
+  "name": "thomasweinert/phpunit-xpath-assertions",
+  "description": "Xpath assertions and constraints for PHPUnit",
+  "license": "BSD-3-Clause",
+  "authors": [
+    {
+      "name": "Thomas Weinert",
+      "email": "thomas@weinert.info",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^7.1",
+    "phpunit/phpunit": "^6.4"
+  },
+  "autoload": {
+    "classmap": [
+      "src/"
+    ]
+  }
+}
+
