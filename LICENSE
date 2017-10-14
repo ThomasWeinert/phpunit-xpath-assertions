@@ -1,6 +1,6 @@
-PHPUnit Example Extension
+phpunit-xpath-assertions
 
-Copyright (c) 2016-2017, Sebastian Bergmann <sebastian@phpunit.de>.
+Copyright (c) 2017, Thomas Weinert <thomas@weinert.info>.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -15,7 +15,7 @@ are met:
    the documentation and/or other materials provided with the
    distribution.
 
- * Neither the name of Sebastian Bergmann nor the names of his
+ * Neither the name of Thomas Weinert nor the names of his
    contributors may be used to endorse or promote products derived
    from this software without specific prior written permission.
 
