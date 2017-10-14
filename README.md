@@ -1,5 +1,7 @@
 # phpunit-xpath-assertions
 
+[![Build Status](https://img.shields.io/travis/ThomasWeinert/phpunit-xpath-assertions.svg)](https://travis-ci.org/ThomasWeinert/phpunit-xpath-assertions)
+
 Xpath assertions and constraints for use with PHPUnit. 
 
 ## Example
