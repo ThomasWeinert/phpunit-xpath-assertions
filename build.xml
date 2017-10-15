@@ -1,73 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="phpunit-xpath-assertions" default="build">
+<!-- Phing build script to create the Phar files -->
+
+    <property name="directory.project" value="${project.basedir}"/>
+    <property name="directory.target" value="${directory.project}/build"/>
+    <property name="directory.src" value="${directory.project}/src"/>
+    <property name="directory.tools" value="${directory.project}/tools"/>
+
     <target name="build" depends="prepare"/>
 
     <target name="clean" unless="clean.done" description="Cleanup build artifacts">
-        <delete dir="${basedir}/build"/>
-        <delete dir="${basedir}/tools"/>
-        <delete dir="${basedir}/vendor"/>
-        <delete file="${basedir}/manifest.xml.in"/>
-
+        <delete dir="${directory.target}"/>
         <property name="clean.done" value="true"/>
     </target>
 
     <target name="prepare" unless="prepare.done" depends="install-tools" description="Prepare for build">
-        <mkdir dir="${basedir}/build"/>
-
+        <mkdir dir="${directory.target}"/>
         <property name="prepare.done" value="true"/>
     </target>
 
-    <target name="install-tools" unless="tools-installed" depends="-tools-installed" description="Install tools using phive">
-        <exec executable="phive" taskname="phive">
+    <target name="install-tools" unless="tools-installed" depends="_tools-installed" description="Install tools using phive">
+        <exec executable="phive" passthru="true">
             <arg value="install"/>
         </exec>
     </target>
 
-    <target name="package" depends="prepare,-get-version-number-from-git" description="Package as PHAR">
-        <copy todir="${basedir}/build" file="${basedir}/LICENSE" />
-        <copy tofile="${basedir}/build/manifest.xml" file="${basedir}/manifest.xml.in" />
-        <replace file="${basedir}/build/manifest.xml" token="@@version@@" value="${version}"/>
-        <copy todir="${basedir}/build/phpunit-xpath-assertions">
-            <fileset dir="${basedir}/src">
+    <target name="package" depends="prepare,_get-version-number-from-git" description="Package as PHAR">
+        <copy todir="${directory.target}" file="${directory.project}/LICENSE" />
+        <copy tofile="${directory.target}/manifest.xml" file="${directory.project}/manifest.xml.in">
+            <filterchain>
+                <replacetokens begintoken="@@" endtoken="@@">
+                    <token key="version" value="${version}" />
+                </replacetokens>
+            </filterchain>
+        </copy>
+        <copy todir="${directory.target}/phpunit-xpath-assertions">
+            <fileset dir="${directory.src}">
                 <include name="**/*" />
             </fileset>
         </copy>
 
-        <exec executable="${basedir}/tools/phpab" taskname="phpab">
+        <exec executable="${directory.tools}/phpab" passthru="true">
             <arg value="--all" />
             <arg value="--static" />
             <arg value="--once" />
             <arg value="--phar" />
             <arg value="--output" />
-            <arg path="${basedir}/build/phpunit-xpath-assertions-${version}.phar" />
-            <arg path="${basedir}/build" />
+            <arg path="${directory.target}/phpunit-xpath-assertions-${version}.phar" />
+            <arg path="${directory.target}" />
         </exec>
 
         <delete includeemptydirs="true">
-            <fileset dir="${basedir}/build">
+            <fileset dir="${directory.target}">
                 <include name="**/*"/>
                 <exclude name="phpunit-xpath-assertions-${version}.phar"/>
             </fileset>
         </delete>
 
-        <exec executable="gpg" failonerror="true" taskname="gpg">
+        <exec executable="gpg" checkreturn="true" passthru="true">
             <arg value="--local-user"/>
             <arg value="thomas@weinert.info"/>
             <arg value="--armor"/>
             <arg value="--detach-sign"/>
-            <arg path="${basedir}/build/phpunit-xpath-assertions-${version}.phar"/>
+            <arg path="${directory.target}/phpunit-xpath-assertions-${version}.phar"/>
         </exec>
     </target>
 
-    <target name="-get-version-number-from-git">
-        <exec executable="bash" outputproperty="version" failonerror="true" dir="${basedir}">
-            <arg value="-c" />
-            <arg value="/usr/bin/git describe --abbrev=0" />
+    <target name="_get-version-number-from-git">
+        <exec executable="git" returnProperty="git.return" outputProperty="git.output" dir="${directory.project}">
+            <arg line="describe --abbrev=0" />
         </exec>
+        <if>
+            <equals arg1="${git.return}" arg2="0" />
+            <then>
+                <property name="version" value="${git.output}"/>
+            </then>
+            <else>
+                <exec executable="git" returnProperty="git.return" outputProperty="git.output" dir="${directory.project}">
+                    <arg line="rev-parse --short HEAD"/>
+                </exec>
+                <if>
+                    <equals arg1="${git.return}" arg2="0" />
+                    <then>
+                        <property name="version" value="${git.output}"/>
+                    </then>
+                    <else>
+                        <property name="git.failure" value="true" override="true"/>
+                    </else>
+                </if>
+            </else>
+        </if>
+        <fail if="git.failure" message="${git.output}"/>
+        <echo message="Version: ${version}"/>
     </target>
 
-    <target name="-tools-installed">
-        <available file="${basedir}/tools" property="tools-installed" type="dir"/>
+    <target name="_tools-installed">
+        <available file="${directory.tools}" property="tools-installed" type="dir"/>
     </target>
 </project>
 
