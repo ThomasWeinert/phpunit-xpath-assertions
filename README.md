@@ -2,6 +2,11 @@
 
 [![Build Status](https://img.shields.io/travis/ThomasWeinert/phpunit-xpath-assertions.svg)](https://travis-ci.org/ThomasWeinert/phpunit-xpath-assertions)
 
+[![License](https://img.shields.io/packagist/l/thomasweinert/phpunit-xpath-assertions.svg)](https://github.com/thomasweinert/phpunit-xpath-assertions/blob/master/LICENSE)
+[![Total Downloads](https://img.shields.io/packagist/dt/thomasweinert/phpunit-xpath-assertions.svg)](https://packagist.org/packages/thomasweinert/phpunit-xpath-assertions)
+[![Latest Stable Version](https://img.shields.io/packagist/v/thomasweinert/phpunit-xpath-assertions.svg)](https://packagist.org/packages/thomasweinert/phpunit-xpath-assertions)
+[![Latest Unstable Version](https://img.shields.io/packagist/vpre/thomasweinert/phpunit-xpath-assertions.svg)](https://packagist.org/packages/thomasweinert/phpunit-xpath-assertions)
+
 Xpath assertions and constraints for use with PHPUnit. 
 
 ## Example
