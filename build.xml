@@ -2,6 +2,10 @@
 <project name="phpunit-xpath-assertions" default="build">
 <!-- Phing build script to create the Phar files -->
 
+    <!-- GPG user used to sign the phar -->
+    <property name="gpg.user" value="thomas@weinert.info"/>
+    
+    <property name="project.name" value="${phing.project.name}"/>
     <property name="directory.project" value="${project.basedir}"/>
     <property name="directory.target" value="${directory.project}/build"/>
     <property name="directory.src" value="${directory.project}/src"/>
@@ -34,7 +38,7 @@
                 </replacetokens>
             </filterchain>
         </copy>
-        <copy todir="${directory.target}/phpunit-xpath-assertions">
+        <copy todir="${directory.target}/${project.name}">
             <fileset dir="${directory.src}">
                 <include name="**/*" />
             </fileset>
@@ -46,23 +50,23 @@
             <arg value="--once" />
             <arg value="--phar" />
             <arg value="--output" />
-            <arg path="${directory.target}/phpunit-xpath-assertions-${version}.phar" />
+            <arg path="${directory.target}/${project.name}-${version}.phar" />
             <arg path="${directory.target}" />
         </exec>
 
         <delete includeemptydirs="true">
             <fileset dir="${directory.target}">
                 <include name="**/*"/>
-                <exclude name="phpunit-xpath-assertions-${version}.phar"/>
+                <exclude name="${project.name}-${version}.phar"/>
             </fileset>
         </delete>
 
         <exec executable="gpg" checkreturn="true" passthru="true">
             <arg value="--local-user"/>
-            <arg value="thomas@weinert.info"/>
+            <arg value="${gpg.user}"/>
             <arg value="--armor"/>
             <arg value="--detach-sign"/>
-            <arg path="${directory.target}/phpunit-xpath-assertions-${version}.phar"/>
+            <arg path="${directory.target}/${project.name}-${version}.phar"/>
         </exec>
     </target>
 
