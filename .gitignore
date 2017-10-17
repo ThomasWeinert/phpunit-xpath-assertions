@@ -3,4 +3,4 @@
 /build
 /tools
 /vendor
-/composer.lock
+/build.properties
