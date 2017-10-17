@@ -95,9 +95,9 @@
     </target>
 
     <target name="get-version-number-from-git" hidden="yes">
-        <!-- Fetch annotated tag for current commit if it exists -->
+        <!-- Fetch latest tag on current branch -->
         <exec executable="git" returnProperty="git.return" outputProperty="git.output" dir="${directory.project}">
-            <arg line="describe --abbrev=0" />
+            <arg line="describe --tags --abbrev=0" />
         </exec>
         <if>
             <equals arg1="${git.return}" arg2="0" />
