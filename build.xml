@@ -5,8 +5,6 @@
 
     * build - default, creates the phar
     * package - creates the phar and signs it using GPG (needed for Phive)
-
-    * prepare - install tools and prepare build directory
     * cleanup - remove build directory
 -->
 
@@ -17,25 +15,34 @@
     <property name="project.name" value="${phing.project.name}"/>
     <property name="gpg.user" value="${configuration.gpg.user}"/>
 
+    <condition property="directory.separator" value="\" else="/">
+        <os family="windows"/>
+    </condition>
+
     <property name="directory.project" value="${project.basedir}"/>
-    <property name="directory.target" value="${directory.project}/build"/>
-    <property name="directory.src" value="${directory.project}/src"/>
-    <property name="directory.tools" value="${directory.project}/tools"/>
+    <property name="directory.target" value="${directory.project}${directory.separator}build"/>
+    <property name="directory.src" value="${directory.project}${directory.separator}src"/>
+    <property name="directory.tools" value="${directory.project}${directory.separator}tools"/>
 
     <target name="build" depends="prepare, get-version-number-from-git" description="Build PHAR">
-        <copy todir="${directory.target}" file="${directory.project}/LICENSE" />
-        <copy tofile="${directory.target}/manifest.xml" file="${directory.project}/manifest.xml.in">
+        <copy todir="${directory.target}" file="${directory.project}${directory.separator}LICENSE" />
+        <copy
+            tofile="${directory.target}${directory.separator}manifest.xml"
+            file="${directory.project}${directory.separator}manifest.xml.in">
             <filterchain>
                 <replacetokens begintoken="@@" endtoken="@@">
                     <token key="version" value="${version}" />
                 </replacetokens>
             </filterchain>
         </copy>
-        <copy todir="${directory.target}/${project.name}">
+        <copy todir="${directory.target}${directory.separator}${project.name}">
             <fileset dir="${directory.src}">
                 <include name="**/*" />
             </fileset>
         </copy>
+
+        <property name="file.target.name" value="${project.name}${version.suffix}.phar"/>
+        <property name="file.target" value="${directory.target}${directory.separator}${file.target.name}"/>
 
         <exec executable="${directory.tools}/phpab" returnProperty="phpab.return" outputProperty="phpab.output">
             <arg value="--all" />
@@ -43,24 +50,24 @@
             <arg value="--once" />
             <arg value="--phar" />
             <arg value="--output" />
-            <arg path="${directory.target}/${project.name}-${version}.phar" />
+            <arg path="${file.target}" />
             <arg path="${directory.target}" />
         </exec>
         <if>
             <equals arg1="${phpab.return}" arg2="0" />
             <then>
-                <echo message="Created 1 file - ${directory.target}/${project.name}-${version}.phar"/>
+                <echo message="Created 1 file - ${file.target}"/>
             </then>
             <else>
                 <echo message="${phpab.output}"/>
-                <fail message="Failed to create ${directory.target}/${project.name}-${version}.phar"/>
+                <fail message="Failed to create ${file.target}"/>
             </else>
         </if>
 
         <delete includeemptydirs="true">
             <fileset dir="${directory.target}">
                 <include name="**/*"/>
-                <exclude name="${project.name}-${version}.phar"/>
+                <exclude name="${file.target.name}"/>
             </fileset>
         </delete>
     </target>
@@ -79,7 +86,7 @@
             <arg value="${gpg.user}"/>
             <arg value="--armor"/>
             <arg value="--detach-sign"/>
-            <arg path="${directory.target}/${project.name}-${version}.phar"/>
+            <arg path="${file.target.name}"/>
         </exec>
     </target>
 
@@ -88,7 +95,7 @@
         <property name="clean.done" value="true"/>
     </target>
 
-    <target name="prepare" unless="prepare.done" depends="prepare-tools" description="Prepare for build">
+    <target name="prepare" unless="prepare.done" description="Prepare for build" hidden="yes">
         <echo message="Build directory: ${directory.target}"/>
         <mkdir dir="${directory.target}"/>
         <property name="prepare.done" value="true"/>
@@ -103,50 +110,15 @@
             <equals arg1="${git.return}" arg2="0" />
             <then>
                 <property name="version" value="${git.output}"/>
+                <property name="version.suffix" value="-${git.output}"/>
+                <echo message="Version: ${git.output}"/>
             </then>
             <else>
-                <!-- Fallback to commit hash (short) -->
-                <exec executable="git" returnProperty="git.return" outputProperty="git.output" dir="${directory.project}">
-                    <arg line="rev-parse --short HEAD"/>
-                </exec>
-                <if>
-                    <equals arg1="${git.return}" arg2="0" />
-                    <then>
-                        <property name="version" value="${git.output}"/>
-                    </then>
-                    <else>
-                        <property name="git.failure" value="true" override="true"/>
-                    </else>
-                </if>
+                <property name="version" value="dev"/>
+                <property name="version.suffix" value=""/>
+                <echo message="No version tagged yet."/>
             </else>
         </if>
-        <fail if="git.failure" message="${git.output}"/>
-        <echo message="Version: ${version}"/>
-    </target>
-
-    <target name="prepare-tools" unless="tools.installed" depends="tools-installed" hidden="yes">
-        <echo message="Execute &quot;phive install&quot;" />
-        <exec executable="phive" returnProperty="phive.return" outputProperty="phive.output">
-            <arg value="install"/>
-        </exec>
-        <if>
-            <not>
-                <equals arg1="${phive.return}" arg2="0"/>
-            </not>
-            <then>
-                <echo message="${phive.output}"/>
-                <fail message="Tool installation failed."/>
-            </then>
-        </if>
-    </target>
-
-    <target name="tools-installed" hidden="yes">
-        <condition property="tools.installed">
-            <or>
-                <available file="${directory.tools}/phpab" type="file"/>
-                <available file="${directory.tools}/phpab.bat" type="file"/>
-            </or>
-        </condition>
     </target>
 </project>
 
