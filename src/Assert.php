@@ -67,7 +67,7 @@ trait Assert
     /**
      * Asserts that DOM nodes returned by an Xpath expresion are equal to the expected
      *
-     * @param \DOMNode|\Traversable|array|string $expected
+     * @param mixed $expected
      * @param string $expression
      * @param \DOMNode $node
      * @param array|\ArrayAccess $namespaces
@@ -76,20 +76,6 @@ trait Assert
      */
     public static function assertXpathEquals($expected, string $expression, \DOMNode $node, $namespaces = [], $message = '')
     {
-        if (
-            !(
-                $node instanceof \DOMNode ||
-                $node instanceof \Traversable ||
-                \is_array($expected) ||
-                \is_string($expected)
-            )
-        ) {
-            throw InvalidArgumentHelper::factory(
-                1,
-                'DOM node, document or traversable of nodes'
-            );
-        }
-
         if (!(\is_array($namespaces) || $namespaces instanceof \ArrayAccess)) {
             throw InvalidArgumentHelper::factory(
                 4,
