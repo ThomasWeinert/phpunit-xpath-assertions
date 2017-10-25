@@ -116,13 +116,15 @@ public function testChildElementExistsOnTimeInDocument()
 
 ```php
 function equalToXpathResult(
-    string|\DOMNode|\DOMNode[] $expectedNodes, 
-    string $expression, array|\ArrayAccess, 
+    mixed $expected, 
+    string $expression, 
+    array|\ArrayAccess, 
     $namespaces = []
 )
 ```
 
-Compares the serialized XML of the matched nodes with and provided XML string or DOM.
+If the expressions return a node list it compares the serialized XML of the matched nodes with the provided XML string 
+or DOM. If the expression return a scalar uses a constraint depending on the type.
 
 ```php
 public function testCompareChildElementFromDocument()
@@ -135,6 +137,23 @@ public function testCompareChildElementFromDocument()
         self::equalToXpathResult(
             '<child>TEXT</child>',
             '//child'
+        )
+    );
+}
+```
+
+
+```php
+public function testCompareChildElementFromDocumentAsString()
+{
+    $document = new \DOMDocument();
+    $document->loadXML('<root><child>TEXT</child></root>');
+
+    self::assertThat(
+        $document,
+        self::equalToXpathResult(
+            'TEXT',
+            'string(//child)'
         )
     );
 }
