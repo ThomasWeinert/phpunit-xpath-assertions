@@ -81,12 +81,12 @@
             </then>
         </if>
         <echo message="GPG user - ${gpg.user}"/>
-        <exec executable="gpg" checkreturn="true">
+        <exec executable="gpg" checkreturn="true" passthru="true">
             <arg value="--local-user"/>
             <arg value="${gpg.user}"/>
             <arg value="--armor"/>
             <arg value="--detach-sign"/>
-            <arg path="${file.target.name}"/>
+            <arg path="${file.target}"/>
         </exec>
     </target>
 
