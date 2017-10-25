@@ -1,6 +1,9 @@
 <?php
 namespace PHPUnit\Xpath\Constraint;
 
+use PHPUnit\Framework\Constraint\IsEqual;
+use PHPUnit\Framework\Constraint\IsFalse;
+use PHPUnit\Framework\Constraint\IsTrue;
 use PHPUnit\Framework\ExpectationFailedException;
 use SebastianBergmann\Comparator\ComparisonFailure;
 
@@ -31,6 +34,14 @@ class XpathEquals extends Xpath
     {
         $actual = $this->evaluateXpathAgainst($other);
         try {
+            if (is_scalar($actual)) {
+                if (is_bool($actual)) {
+                    $constraint = $this->_value ? new IsTrue() : new IsFalse();
+                } else {
+                    $constraint = new IsEqual($this->_value);
+                }
+                return $constraint->evaluate($actual, $description, $returnResult);
+            }
             if (\is_string($this->_value)) {
                 $this->_value = $this->loadXmlFragment($this->_value);
             }

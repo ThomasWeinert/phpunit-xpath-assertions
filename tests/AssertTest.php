@@ -49,6 +49,10 @@ class AssertTest extends TestCase
         );
     }
 
+    public function testAssertXpathEqualsWithStringExpectingSuccess() {
+        self::assertXpathEquals('One', 'string(//child)', $this->getXMLDocument());
+    }
+
     public function testAssertXpathEqualsFailure() {
         $this->expectException(AssertionFailedError::class);
         $this->expectExceptionMessage(

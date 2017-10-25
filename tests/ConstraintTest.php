@@ -37,4 +37,34 @@ class ConstraintTest extends TestCase
             self::equalToXpathResult($expected, '//child|//x:child', ['x' => 'urn:dummy'])
         );
     }
+
+    public function testAssertXpathEqualsWithStringSuccess() {
+        self::assertThat(
+            $this->getXMLDocument(),
+            self::equalToXpathResult('One','string(//child)')
+        );
+    }
+
+    public function testAssertXpathEqualsWithTrueSuccess() {
+        self::assertThat(
+            $this->getXMLDocument(),
+            self::equalToXpathResult(True,'count(//child) > 0')
+        );
+    }
+
+    public function testAssertXpathEqualsWithFalseSuccess() {
+        self::assertThat(
+            $this->getXMLDocument(),
+            self::equalToXpathResult(False,'count(//child) > 42')
+        );
+    }
+
+    public function testAssertXpathEqualsWithTrueFailure() {
+        self::assertThat(
+            $this->getXMLDocument(),
+            self::logicalNot(
+                self::equalToXpathResult(True,'count(//child) > 42')
+            )
+        );
+    }
 }
