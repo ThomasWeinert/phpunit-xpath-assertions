@@ -2,6 +2,8 @@
 namespace PHPUnit\Xpath\Constraint;
 
 use PHPUnit\Framework\Constraint\Constraint as PHPUnitConstraint;
+use PHPUnit\Util\InvalidArgumentHelper;
+use PHPUnit\Xpath\Import\JsonToXml;
 
 /**
  * Constraint superclass for constraints that uses Xpath expressions
@@ -35,17 +37,44 @@ abstract class Xpath extends PHPUnitConstraint
      * Evaluate the xpath expression on the given context and
      * return the result.
      *
-     * @param \DOMNode $context
+     * @param mixed $context
      * @return \DOMNodeList|bool|string|float
      */
-    protected function evaluateXpathAgainst(\DOMNode $context)
+    protected function evaluateXpathAgainst($context)
     {
-        $document = $context instanceof \DOMDocument ? $context : $context->ownerDocument;
+        if ($context instanceof \DOMNode) {
+            $document = $context instanceof \DOMDocument ? $context : $context->ownerDocument;
+        } else {
+            $importer = new JsonToXml($context);
+            $document = $importer->getDocument();
+            $context = $document->documentElement;
+        }
 
         $xpath = new \DOMXPath($document);
         foreach ($this->_namespaces as $prefix=>$namespaceURI) {
             $xpath->registerNamespace($prefix, $namespaceURI);
         }
         return $xpath->evaluate($this->_expression, $context, FALSE);
+    }
+
+    /**
+     * @param mixed $context
+     * @param int $argument
+     * @throws \PHPUnit\Framework\Exception
+     */
+    public static function isValidContext($context, int $argument) {
+        if (
+        !(
+            $context instanceof \DOMNode ||
+            \is_array($context) ||
+            $context instanceof \stdClass ||
+            $context instanceof \JsonSerializable
+        )
+        ) {
+            throw InvalidArgumentHelper::factory(
+                $argument,
+                '\\DOMNode, array, \\stdClass or \\JsonSerializable'
+            );
+        }
     }
 }

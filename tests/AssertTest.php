@@ -22,6 +22,10 @@ class AssertTest extends TestCase
         self::assertXpathMatch('//non-existing', $this->getXMLDocument());
     }
 
+    public function testAssertXpathMatchAgainstJsonExpectingSuccess() {
+        self::assertXpathMatch('//child', [ 'child' => 'Text']);
+    }
+
     public function testAssertXpathCountSuccess() {
         self::assertXpathCount(1, '//child', $this->getXMLDocument());
     }

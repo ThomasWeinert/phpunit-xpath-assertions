@@ -35,7 +35,7 @@ class XpathTest extends TestCase
 }
 
 class Xpath_TestProxy extends Xpath {
-    public function evaluateXpathAgainst(\DOMNode $context) {
+    public function evaluateXpathAgainst($context) {
         return parent::evaluateXpathAgainst($context);
     }
     public function matches($other) {

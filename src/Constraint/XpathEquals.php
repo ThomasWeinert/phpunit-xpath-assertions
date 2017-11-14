@@ -5,6 +5,7 @@ use PHPUnit\Framework\Constraint\IsEqual;
 use PHPUnit\Framework\Constraint\IsFalse;
 use PHPUnit\Framework\Constraint\IsTrue;
 use PHPUnit\Framework\ExpectationFailedException;
+use PHPUnit\Xpath\Import\JsonToXml;
 use SebastianBergmann\Comparator\ComparisonFailure;
 
 /**
@@ -35,7 +36,7 @@ class XpathEquals extends Xpath
         $actual = $this->evaluateXpathAgainst($other);
         try {
             if (is_scalar($actual)) {
-                if (is_bool($actual)) {
+                if (\is_bool($actual)) {
                     $constraint = $this->_value ? new IsTrue() : new IsFalse();
                 } else {
                     $constraint = new IsEqual($this->_value);
@@ -44,6 +45,9 @@ class XpathEquals extends Xpath
             }
             if (\is_string($this->_value)) {
                 $this->_value = $this->loadXmlFragment($this->_value);
+            } elseif (!$this->isNodeOrNodeList($this->_value)) {
+                $importer = new JsonToXml($this->_value);
+                $this->_value = $importer->getDocument()->documentElement->childNodes;
             }
             $expectedAsString = $this->nodesToText($this->_value);
             $actualAsString   = $this->nodesToText($actual);
@@ -69,6 +73,12 @@ class XpathEquals extends Xpath
                 $f
             );
         }
+    }
+
+    private function isNodeOrNodeList($value) {
+        return
+            ($this->_value instanceof \DOMNodeList || $this->_value instanceof \DOMNode) ||
+            (\is_array($this->_value) && isset($this->_value[0]) && $this->_value[0] instanceof \DOMNode);
     }
 
     private function nodesToText($nodes) {
