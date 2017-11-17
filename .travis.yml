@@ -1,8 +1,6 @@
 language: php
 
-sudo: required
-dist: trusty
-group: edge
+sudo: false
 
 php:
   - 7.1
@@ -10,6 +8,10 @@ php:
   - 7.2
   - 7.2snapshot
   - nightly
+  
+env:
+  global:
+    - DEFAULT_COMPOSER_FLAGS="--no-interaction --no-ansi --no-progress --no-suggest"
   
 matrix:
   allow_failures:
