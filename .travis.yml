@@ -1,0 +1,27 @@
+language: php
+
+sudo: false
+
+php:
+  - 7.1
+  - 7.1snapshot
+  - 7.2
+  - 7.2snapshot
+  - nightly
+  
+env:
+  global:
+    - DEFAULT_COMPOSER_FLAGS="--no-interaction --no-ansi --no-progress --no-suggest"
+  
+matrix:
+  allow_failures:
+    - php: nightly
+
+before_install:
+  - composer self-update
+  - composer clear-cache
+
+install: composer install
+
+script: vendor/bin/phpunit tests
+

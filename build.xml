@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="phpunit-xpath-assertions" default="build" basedir=".">
+<!--
+    Phing build script:
+
+    * build - default, creates the phar
+    * package - creates the phar and signs it using GPG (needed for Phive)
+    * cleanup - remove build directory
+-->
+
+    <!-- Load dist.build.properties and build.properties as configuration -->
+    <property file="dist.build.properties" prefix="configuration" override="true"/>
+    <property file="build.properties" prefix="configuration" override="true"/>
+
+    <property name="project.name" value="${phing.project.name}"/>
+    <property name="gpg.user" value="${configuration.gpg.user}"/>
+
+    <condition property="directory.separator" value="\" else="/">
+        <os family="windows"/>
+    </condition>
+
+    <property name="directory.project" value="${project.basedir}"/>
+    <property name="directory.target" value="${directory.project}${directory.separator}build"/>
+    <property name="directory.src" value="${directory.project}${directory.separator}src"/>
+    <property name="directory.tools" value="${directory.project}${directory.separator}tools"/>
+
+    <target name="build" depends="prepare, get-version-number-from-git" description="Build PHAR">
+        <copy todir="${directory.target}" file="${directory.project}${directory.separator}LICENSE" />
+        <copy
+            tofile="${directory.target}${directory.separator}manifest.xml"
+            file="${directory.project}${directory.separator}manifest.xml.in">
+            <filterchain>
+                <replacetokens begintoken="@@" endtoken="@@">
+                    <token key="version" value="${version}" />
+                </replacetokens>
+            </filterchain>
+        </copy>
+        <copy todir="${directory.target}${directory.separator}${project.name}">
+            <fileset dir="${directory.src}">
+                <include name="**/*" />
+            </fileset>
+        </copy>
+
+        <property name="file.target.name" value="${project.name}${version.suffix}.phar"/>
+        <property name="file.target" value="${directory.target}${directory.separator}${file.target.name}"/>
+
+        <exec executable="${directory.tools}/phpab" returnProperty="phpab.return" outputProperty="phpab.output">
+            <arg value="--all" />
+            <arg value="--static" />
+            <arg value="--once" />
+            <arg value="--phar" />
+            <arg value="--output" />
+            <arg path="${file.target}" />
+            <arg path="${directory.target}" />
+        </exec>
+        <if>
+            <equals arg1="${phpab.return}" arg2="0" />
+            <then>
+                <echo message="Created 1 file - ${file.target}"/>
+            </then>
+            <else>
+                <echo message="${phpab.output}"/>
+                <fail message="Failed to create ${file.target}"/>
+            </else>
+        </if>
+
+        <delete includeemptydirs="true">
+            <fileset dir="${directory.target}">
+                <include name="**/*"/>
+                <exclude name="${file.target.name}"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="package" depends="build" description="Package as PHAR and create signature">
+        <if>
+            <equals arg1="${gpg.user}" arg2=""/>
+            <then>
+                <echo message="Missing GPG user to create signature."/>
+                <fail message="Please set the gpg.user in build.properties."/>
+            </then>
+        </if>
+        <echo message="GPG user - ${gpg.user}"/>
+        <exec executable="gpg" checkreturn="true" passthru="true">
+            <arg value="--local-user"/>
+            <arg value="${gpg.user}"/>
+            <arg value="--armor"/>
+            <arg value="--detach-sign"/>
+            <arg path="${file.target}"/>
+        </exec>
+    </target>
+
+    <target name="clean" unless="clean.done" description="Cleanup build artifacts">
+        <delete dir="${directory.target}"/>
+        <property name="clean.done" value="true"/>
+    </target>
+
+    <target name="prepare" unless="prepare.done" description="Prepare for build" hidden="yes">
+        <echo message="Build directory: ${directory.target}"/>
+        <mkdir dir="${directory.target}"/>
+        <property name="prepare.done" value="true"/>
+    </target>
+
+    <target name="get-version-number-from-git" hidden="yes">
+        <!-- Fetch latest tag on current branch -->
+        <exec executable="git" returnProperty="git.return" outputProperty="git.output" dir="${directory.project}">
+            <arg line="describe --tags --abbrev=0" />
+        </exec>
+        <if>
+            <equals arg1="${git.return}" arg2="0" />
+            <then>
+                <property name="version" value="${git.output}"/>
+                <property name="version.suffix" value="-${git.output}"/>
+                <echo message="Version: ${git.output}"/>
+            </then>
+            <else>
+                <property name="version" value="dev"/>
+                <property name="version.suffix" value=""/>
+                <echo message="No version tagged yet."/>
+            </else>
+        </if>
+    </target>
+</project>
+
