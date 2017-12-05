@@ -20,12 +20,14 @@ class JsonToXml {
      * @var mixed
      */
     private $_json;
+    private $_maxRecursions;
 
-    public function __construct($json) {
+    public function __construct($json, int $maxRecursions = 100) {
         if (!(\is_array($json) || \is_object($json))) {
             throw new \InvalidArgumentException('Invalid $json source.');
         }
         $this->_json = $json;
+        $this->_maxRecursions = \max(0, $maxRecursions);
     }
 
     /**
@@ -36,7 +38,7 @@ class JsonToXml {
         $document->appendChild(
             $root = $document->createElement(self::DEFAULT_QNAME)
         );
-        $this->transferTo($root, $this->_json);
+        $this->transferTo($root, $this->_json, $this->_maxRecursions);
         return $document;
     }
 
@@ -52,27 +54,27 @@ class JsonToXml {
      * @param int $recursions
      */
     private function transferTo(\DOMElement $target, $value, int $recursions = 100): void {
-        if ($recursions < 1) {
-            return;
-        }
         if (\is_object($value) && !($value instanceof \stdClass)) {
             $this->transferTo($target, json_decode(json_encode($value)), $recursions);
             return;
         }
         $type = $this->getTypeFromValue($value);
-        switch ($type) {
-        case self::TYPE_ARRAY :
-            $this->transferArrayTo($target, $value, $recursions - 1);
-            break;
-        case self::TYPE_OBJECT :
-            $this->transferObjectTo($target, $value, $recursions - 1);
-            break;
-        default :
-            $target->setAttribute('type', $type);
-            $string = $this->getValueAsString($type, $value);
-            if (\is_string($string)) {
-                $target->appendChild($target->ownerDocument->createTextNode($string));
+        $target->setAttribute('type', $type);
+        $isComplex = ($type === self::TYPE_ARRAY || $type === self::TYPE_OBJECT);
+        if ($isComplex) {
+            if ($recursions < 1) {
+                return;
             }
+            if ($type === self::TYPE_ARRAY) {
+                $this->transferArrayTo($target, $value, $recursions - 1);
+            } else {
+                $this->transferObjectTo($target, $value, $recursions - 1);
+            }
+            return;
+        }
+        $string = $this->getValueAsString($type, $value);
+        if (\is_string($string)) {
+            $target->appendChild($target->ownerDocument->createTextNode($string));
         }
     }
 
@@ -109,13 +111,9 @@ class JsonToXml {
      *
      * @param string $key
      * @param string $default
-     * @param bool $isArrayElement
      * @return string
      */
-    private function getQualifiedName(string $key, string $default, bool $isArrayElement = FALSE): string {
-        if ($isArrayElement) {
-            $key = $default;
-        }
+    private function getQualifiedName(string $key, string $default): string {
         $nameStartChar =
             'A-Z_a-z'.
             '\\x{C0}-\\x{D6}\\x{D8}-\\x{F6}\\x{F8}-\\x{2FF}\\x{370}-\\x{37D}'.
@@ -161,17 +159,10 @@ class JsonToXml {
      * @param int $recursions
      */
     private function transferArrayTo(\DOMElement $target, array $value, int $recursions): void {
-        $parentName = '';
-        if ($target instanceof \DOMElement) {
-            $target->setAttribute( 'type', 'array');
-            $parentName = $target->getAttribute('name') ?: $target->localName;
-        }
         foreach ($value as $item) {
             /** @var \DOMElement $child */
             $child = $target->appendChild(
-                $target->ownerDocument->createElement(
-                    $this->getQualifiedName($parentName, self::DEFAULT_QNAME, TRUE)
-                )
+                $target->ownerDocument->createElement(self::DEFAULT_QNAME)
             );
             $this->transferTo($child, $item, $recursions);
         }
@@ -192,7 +183,6 @@ class JsonToXml {
      */
     private function transferObjectTo(\DOMElement $target, $value, int $recursions): void {
         $properties = \is_array($value) ? $value : \get_object_vars($value);
-        $target->setAttribute('type', 'object');
         foreach ($properties as $property => $item) {
             /** @var \DOMElement $child */
             $tagName = $this->getQualifiedName($property, self::DEFAULT_QNAME);
