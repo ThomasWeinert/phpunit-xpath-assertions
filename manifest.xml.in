@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <phar xmlns="https://phar.io/xml/manifest/1.0">
     <contains name="thomasweinert/phpunit-xpath-assertions" version="@@version@@" type="extension">
-        <extension for="phpunit/phpunit" compatible="^6.4"/>
+        <extension for="phpunit/phpunit" compatible="^7.0"/>
     </contains>
 
     <copyright>
