@@ -28,7 +28,7 @@ class XpathCount extends Xpath
         return $this->_actualCount === $this->_expectedCount;
     }
 
-    protected function failureDescription($other)
+    protected function failureDescription($other): string
     {
         return \sprintf(
             'actual node count %d matches expected count %d',
@@ -40,7 +40,7 @@ class XpathCount extends Xpath
     /**
      * @return string
      */
-    public function toString()
+    public function toString(): string
     {
         return \sprintf(
             'count matches %d',

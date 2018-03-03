@@ -38,9 +38,9 @@ class Xpath_TestProxy extends Xpath {
     public function evaluateXpathAgainst($context) {
         return parent::evaluateXpathAgainst($context);
     }
-    public function matches($other) {
+    public function matches($other): bool {
     }
-    public function toString() {
+    public function toString(): string {
         return '';
     }
 }

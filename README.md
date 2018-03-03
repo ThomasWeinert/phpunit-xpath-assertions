@@ -203,3 +203,21 @@ public function testChildWithNamespaceElementExistsTwoTimesInDocument()
     );
 }
 ```
+
+### JSON (>= 1.2.0)
+
+The assertions can be used with JsonSerializable objects/arrays. They will be 
+converted into a DOM representation internally. 
+
+```php
+public function testHomePhoneNumbersEqualsExpected()
+{
+    self::assertXpathEquals(
+        [
+            [ 'type' => 'home', 'number' => '212 555-1234' ]
+        ],
+        'phoneNumbers/*[type="home"]',
+        json_decode($wikipediaJsonExample)
+    );
+}
+```

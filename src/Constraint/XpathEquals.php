@@ -112,7 +112,7 @@ class XpathEquals extends Xpath
     /**
      * @return string
      */
-    public function toString()
+    public function toString(): string
     {
         return 'is equal to nodes matched by: '.$this->_expression;
     }
