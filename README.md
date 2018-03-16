@@ -221,3 +221,19 @@ public function testHomePhoneNumbersEqualsExpected()
     );
 }
 ```
+
+# Contributing
+
+Contributions are welcome, please use the issue tracker to report bug and feature ideas.
+
+## Build a modified phar
+
+This project uses Phive and Composer. It includes build scripts to create
+your own phar file. Use Git to checkout the repository and run `phive install` in the project directory
+this will install the necessary tools into the `tools` subdirectory. To create a phar call
+`tools\phing`.
+
+### Build a signed phar
+
+To create a signed phar copy the `dist.build.properties` to `build.properties` and
+set the `gpg.user`. After that call `tools\phing package`. 
