@@ -10,10 +10,10 @@
         }
     ],
     "require": {
-        "php": "^7.0",
+        "php": "^7.1",
         "ext-dom": "*",
         "ext-json": "*",
-        "phpunit/phpunit": "^6.0"
+        "phpunit/phpunit": "^7.0"
     },
     "autoload": {
         "classmap": [
