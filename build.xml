@@ -1,124 +1,246 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="phpunit-xpath-assertions" default="build" basedir=".">
-<!--
-    Phing build script:
+<project name="PHPUnit Extension" default="build">
 
-    * build - default, creates the phar
-    * package - creates the phar and signs it using GPG (needed for Phive)
-    * cleanup - remove build directory
--->
+    <target name="clean" unless="clean.done" description="Cleanup build artifacts">
+        <delete dir="${project.basedir}/build"/>
+        <property name="clean.done" value="true"/>
+    </target>
 
-    <!-- Load dist.build.properties and build.properties as configuration -->
-    <property file="dist.build.properties" prefix="configuration" override="true"/>
-    <property file="build.properties" prefix="configuration" override="true"/>
+    <target name="reformat" description="Reformat source code">
+        <exec executable="${project.basedir}/tools/php-cs-fixer" passthru="true" dir="${project.basedir}">
+          <arg value="fix"/>
+        </exec>
+    </target>
 
-    <property name="project.name" value="${phing.project.name}"/>
-    <property name="gpg.user" value="${configuration.gpg.user}"/>
+    <target name="test" description="Run unit tests">
+        <exec executable="${project.basedir}/tools/phpunit" passthru="true" dir="${project.basedir}">
+          <arg value="tests"/>
+        </exec>
+    </target>
 
-    <condition property="directory.separator" value="\" else="/">
-        <os family="windows"/>
-    </condition>
+    <target name="build" depends="prepare,get-version-number-from-git" description="Build phar">
+        <property name="composer.name" value="default"/>
+        <json-properties file="${project.basedir}/composer.json" prefix="composer"/>
+        <propertyregex
+            property="extension.name"
+            pattern="[^/]+/(.+)"
+            subject="${composer.name}"
+            match="$1"
+            defaultvalue="phpunit-extension"/>
+        <condition property="project.version.suffix" else="-${project.version}" value="">
+            <equals arg1="${project.version}" arg2=""/>
+        </condition>
+        <property name="build.directory" value="${project.basedir}/build"/>
+        <property name="build.target" value="${build.directory}/files"/>
+        <property name="build.target.package" value="${build.directory}/${extension.name}${project.version.suffix}.phar"/>
 
-    <property name="directory.project" value="${project.basedir}"/>
-    <property name="directory.target" value="${directory.project}${directory.separator}build"/>
-    <property name="directory.src" value="${directory.project}${directory.separator}src"/>
-    <property name="directory.tools" value="${directory.project}${directory.separator}tools"/>
-
-    <target name="build" depends="prepare, get-version-number-from-git" description="Build PHAR">
-        <copy todir="${directory.target}" file="${directory.project}${directory.separator}LICENSE" />
-        <copy
-            tofile="${directory.target}${directory.separator}manifest.xml"
-            file="${directory.project}${directory.separator}manifest.xml.in">
-            <filterchain>
-                <replacetokens begintoken="@@" endtoken="@@">
-                    <token key="version" value="${version}" />
-                </replacetokens>
-            </filterchain>
-        </copy>
-        <copy todir="${directory.target}${directory.separator}${project.name}">
-            <fileset dir="${directory.src}">
+        <copy todir="${build.target}" file="${project.basedir}/LICENSE" />
+        <copy todir="${build.target}/${extension.name}">
+            <fileset dir="${project.basedir}/src">
                 <include name="**/*" />
+                <exclude name="**/README.md" />
             </fileset>
         </copy>
 
-        <property name="file.target.name" value="${project.name}${version.suffix}.phar"/>
-        <property name="file.target" value="${directory.target}${directory.separator}${file.target.name}"/>
+        <create-phive-manifest manifestFile="${build.target}/manifest.xml" version="${project.version}"/>
 
-        <exec executable="${directory.tools}/phpab" returnProperty="phpab.return" outputProperty="phpab.output">
+        <exec executable="${project.basedir}/tools/phpab">
             <arg value="--all" />
             <arg value="--static" />
             <arg value="--once" />
             <arg value="--phar" />
             <arg value="--output" />
-            <arg path="${file.target}" />
-            <arg path="${directory.target}" />
+            <arg path="${build.target.package}" />
+            <arg path="${build.target}" />
         </exec>
-        <if>
-            <equals arg1="${phpab.return}" arg2="0" />
-            <then>
-                <echo message="Created 1 file - ${file.target}"/>
-            </then>
-            <else>
-                <echo message="${phpab.output}"/>
-                <fail message="Failed to create ${file.target}"/>
-            </else>
-        </if>
 
         <delete includeemptydirs="true">
-            <fileset dir="${directory.target}">
+            <fileset dir="${build.directory}">
                 <include name="**/*"/>
-                <exclude name="${file.target.name}"/>
+                <exclude name="*.phar"/>
+                <exclude name="*.phar.asc"/>
             </fileset>
         </delete>
     </target>
 
-    <target name="package" depends="build" description="Package as PHAR and create signature">
+    <target name="package" depends="build,get-build-properties" description="Build phar and create signature">
         <if>
             <equals arg1="${gpg.user}" arg2=""/>
             <then>
-                <echo message="Missing GPG user to create signature."/>
-                <fail message="Please set the gpg.user in build.properties."/>
+               <warn message="No GPG user provided, can not sign package."/>
             </then>
+            <else>
+                <exec executable="gpg" passthru="true">
+                    <arg value="--yes"/>
+                    <arg value="--local-user"/>
+                    <arg value="${gpg.user}"/>
+                    <arg value="--armor"/>
+                    <arg value="--detach-sign"/>
+                    <arg path="${build.target.package}" />
+                </exec>
+            </else>
         </if>
-        <echo message="GPG user - ${gpg.user}"/>
-        <exec executable="gpg" checkreturn="true" passthru="true">
-            <arg value="--local-user"/>
-            <arg value="${gpg.user}"/>
-            <arg value="--armor"/>
-            <arg value="--detach-sign"/>
-            <arg path="${file.target}"/>
-        </exec>
-    </target>
-
-    <target name="clean" unless="clean.done" description="Cleanup build artifacts">
-        <delete dir="${directory.target}"/>
-        <property name="clean.done" value="true"/>
     </target>
 
     <target name="prepare" unless="prepare.done" description="Prepare for build" hidden="yes">
-        <echo message="Build directory: ${directory.target}"/>
-        <mkdir dir="${directory.target}"/>
+        <mkdir dir="${project.basedir}/build"/>
         <property name="prepare.done" value="true"/>
     </target>
 
     <target name="get-version-number-from-git" hidden="yes">
-        <!-- Fetch latest tag on current branch -->
-        <exec executable="git" returnProperty="git.return" outputProperty="git.output" dir="${directory.project}">
-            <arg line="describe --tags --abbrev=0" />
-        </exec>
+        <property name="project.version" value=""/>
+        <trycatch property="error.message">
+            <try>
+                <exec executable="git" outputProperty="git.version" checkreturn="true" dir="${project.basedir}">
+                    <arg line="describe --abbrev=0 --tags" />
+                </exec>
+                <property name="project.version" value="${git.version}" override="true"/>
+                <echo message="Project version: ${git.version}"/>
+            </try>
+            <catch>
+                <echo level="error" message="Failed to get version from Git."/>
+                <echo level="error" message="${error.message}"/>
+            </catch>
+        </trycatch>
+    </target>
+
+    <target name="get-build-properties" hidden="true">
+        <property name="gpg.user" value=""/>
+        <property file="build.properties" override="true"/>
+        <property name="store.build.properties" value="false"/>
         <if>
-            <equals arg1="${git.return}" arg2="0" />
+            <equals arg1="${gpg.user}" arg2=""/>
             <then>
-                <property name="version" value="${git.output}"/>
-                <property name="version.suffix" value="-${git.output}"/>
-                <echo message="Version: ${git.output}"/>
+                <propertyprompt promptText="Please provide GPG key user for package signing" propertyName="gpg.user"/>
+                <property name="store.build.properties" value="true" override="true"/>
             </then>
-            <else>
-                <property name="version" value="dev"/>
-                <property name="version.suffix" value=""/>
-                <echo message="No version tagged yet."/>
-            </else>
+        </if>
+        <if>
+            <istrue value="${store.build.properties}"/>
+            <then>
+               <append destFile="build.properties" overwrite="true" append="false">
+                   # gpg key user for package signature
+                   gpg.user=${gpg.user}
+                   <filterchain>
+                      <replaceregexp>
+                        <regexp pattern="^[ \t]+|[ \t]+$" replace="" modifiers="m"/>
+                        <regexp pattern="^\s+|\s+$" replace=""/>
+                      </replaceregexp>
+                   </filterchain>
+               </append>
+            </then>
         </if>
     </target>
+
+    <adhoc-task name="json-properties">
+        <![CDATA[
+            class ReadJsonPropertiesTask extends Task {
+                private $file = '';
+                private $prefix = '';
+
+                public function setFile($file) {
+                    $this->file = $file;
+                }
+
+                public function setPrefix($prefix) {
+                    $this->prefix = $prefix;
+                }
+
+                private function setProperties($properties, $prefix) {
+                    foreach ($properties as $key => $value) {
+                        if (is_array($value) || $value instanceOf \stdClass) {
+                            $this->setProperties(
+                                $value, $prefix.$key.'.'
+                            );
+                        } else {
+                            $this->project->setProperty(
+                                $prefix.$key, $value
+                            );
+                        }
+                    }
+                }
+
+                public function main() {
+                    $json = json_decode(file_get_contents($this->file));
+                    $this->setProperties(
+                        $json,
+                        $this->prefix !== '' ? $this->prefix.'.' : ''
+                    );
+                }
+            }
+        ]]>
+    </adhoc-task>
+
+    <adhoc-task name="create-phive-manifest">
+        <![CDATA[
+            class CreatePhiveManifestTask extends Task {
+                private $composerFile = 'composer.json';
+                private $manifestFile = 'manifest.xml';
+                private $version = '';
+
+                public function setComposerFile($file) {
+                    $this->composerFile = $file;
+                }
+
+                public function setManifestFile($file) {
+                    $this->manifestFile = $file;
+                }
+
+                public function setVersion($version) {
+                   $this->version = $version;
+                }
+
+                function main() {
+                    $json = json_decode(file_get_contents($this->composerFile));
+                    $xmlns = 'https://phar.io/xml/manifest/1.0';
+
+                    $document = new \DOMDocument();
+                    $phar = $document->appendChild(
+                        $document->createElementNS($xmlns, 'phar')
+                    );
+
+                    $contains = $phar->appendChild(
+                        $document->createElementNS($xmlns, 'contains')
+                    );
+                    $contains->setAttribute('name', $json->name);
+                    $contains->setAttribute('version', $this->version);
+                    $contains->setAttribute('type', 'extension');
+                    $extension = $contains->appendChild(
+                        $document->createElementNS($xmlns, 'extension')
+                    );
+                    $extension->setAttribute('for', 'phpunit/phpunit');
+                    $extension->setAttribute('version', $json->require->{'phpunit/phpunit'});
+
+                    $requires = $phar->appendChild(
+                        $document->createElementNS($xmlns, 'requires')
+                    );
+                    $php = $requires->appendChild(
+                        $document->createElementNS($xmlns, 'php')
+                    );
+                    $php->setAttribute('version', $json->require->php);
+
+                    $copyright = $phar->appendChild(
+                        $document->createElementNS($xmlns, 'copyright')
+                    );
+                    $license = $copyright->appendChild(
+                        $document->createElementNS($xmlns, 'license')
+                    );
+                    $license->setAttribute('type', $json->license);
+                    foreach ($json->authors as $authorData) {
+                        $author = $copyright->appendChild(
+                            $document->createElementNS($xmlns, 'author')
+                        );
+                        $author->setAttribute('name', $authorData->name);
+                        $author->setAttribute('email', $authorData->email);
+                    }
+
+                    $document->formatOutput = TRUE;
+                    $document->save($this->manifestFile);
+                    $this->log($this->manifestFile);
+                }
+            }
+        ]]>
+    </adhoc-task>
+
 </project>
 
