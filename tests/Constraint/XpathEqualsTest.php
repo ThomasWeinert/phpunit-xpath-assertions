@@ -1,8 +1,15 @@
 <?php
-
+/*
+ * This file is part of phpunit-xpath-assertions.
+ *
+ * (c) Thomas Weinert <thomas@weinert.info>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace PHPUnit\Xpath\Constraint;
 
-require_once __DIR__.'/../TestCase.php';
+require_once __DIR__ . '/../TestCase.php';
 
 use PHPUnit\Xpath\TestCase;
 
@@ -10,7 +17,7 @@ class XpathEqualsTest extends TestCase
 {
     public function testXpathEqualsExpectingTrue()
     {
-        $expected = $this->getXMLDocument('<child>One</child>');
+        $expected   = $this->getXMLDocument('<child>One</child>');
         $constraint = new XpathEquals($expected, '//child');
         $this->assertTrue(
             $constraint->evaluate($this->getXMLDocument(), '', true)
@@ -27,7 +34,7 @@ class XpathEqualsTest extends TestCase
 
     public function testXpathEqualsWithNamespacesExpectingTrue()
     {
-        $expected = $this->getXMLDocument('<child xmlns="urn:dummy">Two</child>');
+        $expected   = $this->getXMLDocument('<child xmlns="urn:dummy">Two</child>');
         $constraint = new XpathEquals($expected, '//d:child[1]', ['d' => 'urn:dummy']);
         $this->assertTrue(
             $constraint->evaluate($this->getXMLDocument(), '', true)
@@ -36,7 +43,7 @@ class XpathEqualsTest extends TestCase
 
     public function testXpathEqualsExpectingFalse()
     {
-        $expected = $this->getXMLDocument('<child>Two</child>');
+        $expected   = $this->getXMLDocument('<child>Two</child>');
         $constraint = new XpathEquals($expected, '//child');
         $this->assertFalse(
             $constraint->evaluate($this->getXMLDocument(), '', true)

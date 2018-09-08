@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of phpunit-xpath-assertions.
+ *
+ * (c) Thomas Weinert <thomas@weinert.info>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace PHPUnit\Xpath\Constraint;
 
 use PHPUnit\Framework\Constraint\IsEqual;
@@ -25,28 +33,31 @@ class XpathEquals extends Xpath
     }
 
     /**
-     * @param mixed $other Value or object to evaluate.
+     * @param mixed  $other        Value or object to evaluate.
      * @param string $description
-     * @param bool $returnResult
+     * @param bool   $returnResult
+     *
      * @return bool
+     *
      * @throws \PHPUnit\Framework\ExpectationFailedException
      */
     public function evaluate($other, $description = '', $returnResult = false)
     {
         $actual = $this->evaluateXpathAgainst($other);
         try {
-            if (is_scalar($actual)) {
+            if (\is_scalar($actual)) {
                 if (\is_bool($actual)) {
                     $constraint = $this->_value ? new IsTrue() : new IsFalse();
                 } else {
                     $constraint = new IsEqual($this->_value);
                 }
+
                 return $constraint->evaluate($actual, $description, $returnResult);
             }
             if (\is_string($this->_value)) {
                 $this->_value = $this->loadXmlFragment($this->_value);
             } elseif (!$this->isNodeOrNodeList($this->_value)) {
-                $importer = new JsonToXml($this->_value);
+                $importer     = new JsonToXml($this->_value);
                 $this->_value = $importer->getDocument()->documentElement->childNodes;
             }
             $expectedAsString = $this->nodesToText($this->_value);
@@ -58,11 +69,12 @@ class XpathEquals extends Xpath
                     $actual,
                     $expectedAsString,
                     $actualAsString,
-                    FALSE,
+                    false,
                     "Failed asserting that two DOM structures are equal.\n"
                 );
             }
-            return TRUE;
+
+            return true;
         } catch (ComparisonFailure $f) {
             if ($returnResult) {
                 return false;
@@ -75,13 +87,15 @@ class XpathEquals extends Xpath
         }
     }
 
-    private function isNodeOrNodeList($value) {
+    private function isNodeOrNodeList($value)
+    {
         return
             ($this->_value instanceof \DOMNodeList || $this->_value instanceof \DOMNode) ||
             (\is_array($this->_value) && isset($this->_value[0]) && $this->_value[0] instanceof \DOMNode);
     }
 
-    private function nodesToText($nodes) {
+    private function nodesToText($nodes)
+    {
         $fragmentString = '';
         if ($nodes instanceof \DOMNode) {
             $fragmentString = $nodes->C14N();
@@ -91,7 +105,7 @@ class XpathEquals extends Xpath
                 $fragmentString .= $node->C14N();
             }
         }
-        $document = new \DOMDocument();
+        $document               = new \DOMDocument();
         $document->formatOutput = true;
         $document->normalizeDocument();
         $fragment = $document->createDocumentFragment();
@@ -106,6 +120,7 @@ class XpathEquals extends Xpath
         $fragment = $document->createDocumentFragment();
         $fragment->appendXML($xmlString);
         $document->appendChild($fragment);
+
         return $document;
     }
 
@@ -114,6 +129,6 @@ class XpathEquals extends Xpath
      */
     public function toString(): string
     {
-        return 'is equal to nodes matched by: '.$this->_expression;
+        return 'is equal to nodes matched by: ' . $this->_expression;
     }
 }

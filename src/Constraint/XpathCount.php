@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of phpunit-xpath-assertions.
+ *
+ * (c) Thomas Weinert <thomas@weinert.info>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace PHPUnit\Xpath\Constraint;
 
 /**
@@ -20,11 +28,14 @@ class XpathCount extends Xpath
 
     /**
      * @param mixed $other Value or object to evaluate.
+     *
      * @return bool
      */
-    protected function matches($other): bool {
-        $actual = $this->evaluateXpathAgainst($other);
+    protected function matches($other): bool
+    {
+        $actual             = $this->evaluateXpathAgainst($other);
         $this->_actualCount = $actual->length;
+
         return $this->_actualCount === $this->_expectedCount;
     }
 

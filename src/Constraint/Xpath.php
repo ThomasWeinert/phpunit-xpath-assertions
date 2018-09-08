@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of phpunit-xpath-assertions.
+ *
+ * (c) Thomas Weinert <thomas@weinert.info>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace PHPUnit\Xpath\Constraint;
 
 use PHPUnit\Framework\Constraint\Constraint as PHPUnitConstraint;
@@ -13,8 +21,8 @@ use PHPUnit\Xpath\Import\JsonToXml;
 abstract class Xpath extends PHPUnitConstraint
 {
     /**
-    * @var string
-    */
+     * @var string
+     */
     protected $_expression;
 
     /**
@@ -24,7 +32,7 @@ abstract class Xpath extends PHPUnitConstraint
 
     /**
      * @param string $expression
-     * @param array $namespaces
+     * @param array  $namespaces
      */
     public function __construct($expression, array $namespaces = [])
     {
@@ -38,6 +46,7 @@ abstract class Xpath extends PHPUnitConstraint
      * return the result.
      *
      * @param mixed $context
+     *
      * @return \DOMNodeList|bool|string|float
      */
     protected function evaluateXpathAgainst($context)
@@ -47,22 +56,25 @@ abstract class Xpath extends PHPUnitConstraint
         } else {
             $importer = new JsonToXml($context);
             $document = $importer->getDocument();
-            $context = $document->documentElement;
+            $context  = $document->documentElement;
         }
 
         $xpath = new \DOMXPath($document);
         foreach ($this->_namespaces as $prefix=>$namespaceURI) {
             $xpath->registerNamespace($prefix, $namespaceURI);
         }
-        return $xpath->evaluate($this->_expression, $context, FALSE);
+
+        return $xpath->evaluate($this->_expression, $context, false);
     }
 
     /**
      * @param mixed $context
-     * @param int $argument
+     * @param int   $argument
+     *
      * @throws \PHPUnit\Framework\Exception
      */
-    public static function isValidContext($context, int $argument) {
+    public static function isValidContext($context, int $argument)
+    {
         if (
         !(
             $context instanceof \DOMNode ||
