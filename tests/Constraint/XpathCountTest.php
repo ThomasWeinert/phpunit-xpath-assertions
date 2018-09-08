@@ -1,8 +1,15 @@
 <?php
-
+/*
+ * This file is part of phpunit-xpath-assertions.
+ *
+ * (c) Thomas Weinert <thomas@weinert.info>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace PHPUnit\Xpath\Constraint;
 
-require_once __DIR__.'/../TestCase.php';
+require_once __DIR__ . '/../TestCase.php';
 
 use PHPUnit\Xpath\TestCase;
 
@@ -31,7 +38,7 @@ class XpathCountTest extends TestCase
             $constraint->evaluate($this->getXMLDocument(), '', true)
         );
     }
-    
+
     public function testXpathCountCastToStringReturnsMessageWithCount()
     {
         $constraint = new XpathCount(1, '//child');

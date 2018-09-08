@@ -1,14 +1,22 @@
 <?php
-
+/*
+ * This file is part of phpunit-xpath-assertions.
+ *
+ * (c) Thomas Weinert <thomas@weinert.info>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace PHPUnit\Xpath\Constraint;
 
-require_once __DIR__.'/../TestCase.php';
+require_once __DIR__ . '/../TestCase.php';
 
 use PHPUnit\Xpath\TestCase;
 
 class XpathTest extends TestCase
 {
-    public function testEvaluateXpathAgainstWithDocument() {
+    public function testEvaluateXpathAgainstWithDocument()
+    {
         $constraint = new Xpath_TestProxy(
             '//child'
         );
@@ -16,7 +24,8 @@ class XpathTest extends TestCase
         $this->assertInstanceOf(\DOMNodeList::class, $actual);
     }
 
-    public function testEvaluateXpathAgainstWithNode() {
+    public function testEvaluateXpathAgainstWithNode()
+    {
         $constraint = new Xpath_TestProxy(
             '//child'
         );
@@ -24,7 +33,8 @@ class XpathTest extends TestCase
         $this->assertInstanceOf(\DOMNodeList::class, $actual);
     }
 
-    public function testEvaluateXpathAgainstWithNodeAndNamespace() {
+    public function testEvaluateXpathAgainstWithNodeAndNamespace()
+    {
         $constraint = new Xpath_TestProxy(
             '//d:child', ['d' => 'urn:dummy']
         );
@@ -34,13 +44,17 @@ class XpathTest extends TestCase
     }
 }
 
-class Xpath_TestProxy extends Xpath {
-    public function evaluateXpathAgainst($context) {
+class Xpath_TestProxy extends Xpath
+{
+    public function evaluateXpathAgainst($context)
+    {
         return parent::evaluateXpathAgainst($context);
     }
-    public function matches($other): bool {
+    public function matches($other): bool
+    {
     }
-    public function toString(): string {
+    public function toString(): string
+    {
         return '';
     }
 }

@@ -1,13 +1,20 @@
 <?php
+/*
+ * This file is part of phpunit-xpath-assertions.
+ *
+ * (c) Thomas Weinert <thomas@weinert.info>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace PHPUnit\Xpath;
 
-require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 class TestCase extends PHPUnitTestCase
 {
-
     const XML =
         '<root>
             <child>One</child>
@@ -17,9 +24,10 @@ class TestCase extends PHPUnitTestCase
 
     public function getXMLDocument($xml = self::XML)
     {
-        $document = new \DOMDocument();
-        $document->preserveWhiteSpace = FALSE;
+        $document                     = new \DOMDocument();
+        $document->preserveWhiteSpace = false;
         $document->loadXML($xml);
+
         return $document;
     }
 }

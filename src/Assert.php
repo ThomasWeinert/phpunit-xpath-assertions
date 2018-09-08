@@ -1,11 +1,19 @@
 <?php
+/*
+ * This file is part of phpunit-xpath-assertions.
+ *
+ * (c) Thomas Weinert <thomas@weinert.info>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace PHPUnit\Xpath;
+
 use PHPUnit\Util\InvalidArgumentHelper;
 use PHPUnit\Xpath\Constraint\Xpath;
 use PHPUnit\Xpath\Constraint\XpathCount;
 use PHPUnit\Xpath\Constraint\XpathEquals;
 use PHPUnit\Xpath\Constraint\XpathMatch;
-
 
 /**
  * Trait that with Xpath based assertions
@@ -15,15 +23,15 @@ trait Assert
     /**
      * Asserts that DOM node matches a specified Xpath expression.
      *
-     * @param string $expression
+     * @param string                                     $expression
      * @param \DOMNode|array|\stdClass|\JsonSerializable $context
-     * @param array|\ArrayAccess $namespaces
-     * @param string $message
+     * @param array|\ArrayAccess                         $namespaces
+     * @param string                                     $message
+     *
      * @throws \PHPUnit\Framework\Exception
      */
     public static function assertXpathMatch(string $expression, $context, $namespaces = [], $message = '')
     {
-
         Xpath::isValidContext($context, 2);
         if (!(\is_array($namespaces) || $namespaces instanceof \ArrayAccess)) {
             throw InvalidArgumentHelper::factory(
@@ -39,11 +47,12 @@ trait Assert
     /**
      * Asserts that DOM node matches a specified Xpath expression.
      *
-     * @param int|string $expected
-     * @param string $expression
+     * @param int|string                                 $expected
+     * @param string                                     $expression
      * @param \DOMNode|array|\stdClass|\JsonSerializable $context
-     * @param array|\ArrayAccess $namespaces
-     * @param string $message
+     * @param array|\ArrayAccess                         $namespaces
+     * @param string                                     $message
+     *
      * @throws \PHPUnit\Framework\Exception
      */
     public static function assertXpathCount($expected, string $expression, $context, $namespaces = [], $message = '')
@@ -70,11 +79,12 @@ trait Assert
     /**
      * Asserts that DOM nodes returned by an Xpath expresion are equal to the expected
      *
-     * @param mixed $expected
-     * @param string $expression
+     * @param mixed                                      $expected
+     * @param string                                     $expression
      * @param \DOMNode|array|\stdClass|\JsonSerializable $context
-     * @param array|\ArrayAccess $namespaces
-     * @param string $message
+     * @param array|\ArrayAccess                         $namespaces
+     * @param string                                     $message
+     *
      * @throws \PHPUnit\Framework\Exception
      */
     public static function assertXpathEquals($expected, string $expression, $context, $namespaces = [], $message = '')
