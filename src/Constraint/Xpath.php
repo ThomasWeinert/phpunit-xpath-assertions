@@ -36,7 +36,9 @@ abstract class Xpath extends PHPUnitConstraint
      */
     public function __construct($expression, array $namespaces = [])
     {
-        parent::__construct();
+        if (method_exists(PHPUnitConstraint::class, '__construct')) {
+            parent::__construct();
+        }
         $this->_expression = $expression;
         $this->_namespaces = $namespaces;
     }
