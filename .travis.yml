@@ -9,9 +9,20 @@ env:
   global:
     - DEFAULT_COMPOSER_FLAGS="--no-interaction --no-ansi --no-progress --no-suggest --prefer-dist"
   matrix:
-    - PHPUNIT_VERSION=7.0.x
-    - PHPUNIT_VERSION=8.0.x
-    - EXTRA_COMPOSER_FLAGS=--prefer-lowest
+    - PHPUNIT_VERSION=^7.0
+    - PHPUNIT_VERSION=^8.0
+
+matrix:
+  include:
+    - php: 7.1
+      env: PHPUNIT_VERSION=^7.0 EXTRA_COMPOSER_FLAGS=--prefer-lowest
+    - php: 7.2
+      env: PHPUNIT_VERSION=^8.0 EXTRA_COMPOSER_FLAGS=--prefer-lowest
+  exclude:
+    - php: 7.1
+      env: PHPUNIT_VERSION=^8.0
+
+before_install: composer require phpunit/phpunit:$PHPUNIT_VERSION --no-update
 
 install: composer update $DEFAULT_COMPOSER_FLAGS $EXTRA_COMPOSER_FLAGS
 
