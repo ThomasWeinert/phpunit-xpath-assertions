@@ -25,8 +25,8 @@ class AssertTest extends TestCase
     public function testAssertXpathMatchFailure()
     {
         $this->expectException(AssertionFailedError::class);
-        $this->expectExceptionMessageRegExp(
-            '(Failed asserting that DOMDocument Object .* matches expression: //non-existing\\.)'
+        $this->expectExceptionMessageMatches(
+            '#(Failed asserting that DOMDocument Object .* matches expression: //non-existing\\.)#ms'
         );
         self::assertXpathMatch('//non-existing', $this->getXMLDocument());
     }

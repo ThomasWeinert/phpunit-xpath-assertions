@@ -1,9 +1,9 @@
 language: php
 
 php:
-  - 7.1
-  - 7.2
   - 7.3
+  - 7.4
+  - 8.0
 
 env:
   global:
@@ -14,13 +14,10 @@ env:
 
 matrix:
   include:
-    - php: 7.1
-      env: PHPUNIT_VERSION=^7.0 EXTRA_COMPOSER_FLAGS=--prefer-lowest
-    - php: 7.2
+    - php: 7.3
       env: PHPUNIT_VERSION=^8.0 EXTRA_COMPOSER_FLAGS=--prefer-lowest
-  exclude:
-    - php: 7.1
-      env: PHPUNIT_VERSION=^8.0
+    - php: 7.4
+      env: PHPUNIT_VERSION=^8.0 EXTRA_COMPOSER_FLAGS=--prefer-lowest
 
 before_install: composer require phpunit/phpunit:$PHPUNIT_VERSION --no-update
 
