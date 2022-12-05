@@ -13,7 +13,7 @@
         "php": "^7.4 || ~8.0.0",
         "ext-dom": "*",
         "ext-json": "*",
-        "phpunit/phpunit": "^8.0 || ^9.0"
+        "phpunit/phpunit": "^9.0"
     },
     "autoload": {
         "classmap": [
