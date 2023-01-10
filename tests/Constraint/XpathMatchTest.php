@@ -7,6 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace PHPUnit\Xpath\Constraint;
 
 require_once __DIR__ . '/../TestCase.php';
@@ -27,16 +28,16 @@ class XpathMatchTest extends TestCase
         $this->assertTrue($constraint->evaluate($this->getXMLDocument(), '', true));
     }
 
-    public function provideMatchingExpressions()
+    public static function provideMatchingExpressions()
     {
         return [
-           ['/root'],
-           ['//child'],
-           ['//test:child', ['test' => 'urn:dummy']],
-           ['//child = "One"'],
-           ['string(//child)'],
-           ['count(//test:child)', ['test' => 'urn:dummy']],
-       ];
+            ['/root'],
+            ['//child'],
+            ['//test:child', ['test' => 'urn:dummy']],
+            ['//child = "One"'],
+            ['string(//child)'],
+            ['count(//test:child)', ['test' => 'urn:dummy']],
+        ];
     }
     /**
      * @dataProvider provideNonMatchingExpressions
@@ -50,7 +51,7 @@ class XpathMatchTest extends TestCase
         $this->assertFalse($constraint->evaluate($this->getXMLDocument(), '', true));
     }
 
-    public function provideNonMatchingExpressions()
+    public static function provideNonMatchingExpressions()
     {
         return [
             ['/child'],

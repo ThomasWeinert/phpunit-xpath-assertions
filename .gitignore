@@ -1,6 +1,8 @@
 /.idea
 /.php_cs.cache
-/build
+/build/files/
+/build/*.phar
+/build/*.phar.asc
 /composer.lock
 /tools
 /vendor
