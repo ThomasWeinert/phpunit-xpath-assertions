@@ -2,37 +2,39 @@
 <project name="PHPUnit Extension" default="build">
 
     <target name="clean" unless="clean.done" description="Cleanup build artifacts">
-        <delete dir="${project.basedir}/build"/>
-        <property name="clean.done" value="true"/>
+        <delete dir="${project.basedir}/build" />
+        <property name="clean.done" value="true" />
     </target>
 
     <target name="reformat" description="Reformat source code">
-        <exec executable="${project.basedir}/tools/php-cs-fixer" passthru="true" dir="${project.basedir}">
-          <arg value="fix"/>
+        <exec executable="${project.basedir}/tools/php-cs-fixer" passthru="true"
+            dir="${project.basedir}">
+            <arg value="fix" />
         </exec>
     </target>
 
     <target name="test" description="Run unit tests">
         <exec executable="${project.basedir}/tools/phpunit" passthru="true" dir="${project.basedir}">
-          <arg value="tests"/>
+            <arg value="tests" />
         </exec>
     </target>
 
     <target name="build" depends="prepare,get-version-number-from-git" description="Build phar">
-        <property name="composer.name" value="default"/>
-        <json-properties file="${project.basedir}/composer.json" prefix="composer"/>
+        <property name="composer.name" value="default" />
+        <json-properties file="${project.basedir}/composer.json" prefix="composer" />
         <propertyregex
             property="extension.name"
             pattern="[^/]+/(.+)"
             subject="${composer.name}"
             match="$1"
-            defaultvalue="phpunit-extension"/>
+            defaultvalue="phpunit-extension" />
         <condition property="project.version.suffix" else="-${project.version}" value="">
-            <equals arg1="${project.version}" arg2=""/>
+            <equals arg1="${project.version}" arg2="" />
         </condition>
-        <property name="build.directory" value="${project.basedir}/build"/>
-        <property name="build.target" value="${build.directory}/files"/>
-        <property name="build.target.package" value="${build.directory}/${extension.name}${project.version.suffix}.phar"/>
+        <property name="build.directory" value="${project.basedir}/build" />
+        <property name="build.target" value="${build.directory}/files" />
+        <property name="build.target.package"
+            value="${build.directory}/${extension.name}${project.version.suffix}.phar" />
 
         <copy todir="${build.target}" file="${project.basedir}/LICENSE" />
         <copy todir="${build.target}/${extension.name}">
@@ -42,9 +44,20 @@
             </fileset>
         </copy>
 
-        <create-phive-manifest manifestFile="${build.target}/manifest.xml" version="${project.version}"/>
+        <create-phive-manifest manifestFile="${build.target}/manifest.xml"
+            version="${project.version}" />
 
-        <exec executable="${project.basedir}/tools/phpab">
+        <php expression="ini_get('phar.readonly')" returnProperty="phar.readonly" level="debug" />
+        <fail unless="phar.readonly"
+            message="Can't create PHAR: phar.readonly is enabled in PHP's INI file" />
+
+        <php expression="$_SERVER['_']" returnProperty="php.executable" level="debug" />
+        <php expression="php_ini_loaded_file()" returnProperty="php.ini" level="debug" />
+
+        <exec executable="${php.executable}">
+            <arg value="-c" />
+            <arg value="${php.ini}" />
+            <arg value="${project.basedir}/vendor/bin/phpab" />
             <arg value="--all" />
             <arg value="--static" />
             <arg value="--once" />
@@ -56,26 +69,31 @@
 
         <delete includeemptydirs="true">
             <fileset dir="${build.directory}">
-                <include name="**/*"/>
-                <exclude name="*.phar"/>
-                <exclude name="*.phar.asc"/>
+                <include
+                    name="**/*" />
+                <exclude name="*.phar" />
+                <exclude name="php.ini" />
+                <exclude name="build-phar" />
+                <exclude
+                    name="*.phar.asc" />
             </fileset>
         </delete>
     </target>
 
-    <target name="package" depends="build,get-build-properties" description="Build phar and create signature">
+    <target name="package" depends="build,get-build-properties"
+        description="Build phar and create signature">
         <if>
-            <equals arg1="${gpg.user}" arg2=""/>
+            <equals arg1="${gpg.user}" arg2="" />
             <then>
-               <warn message="No GPG user provided, can not sign package."/>
+                <warn message="No GPG user provided, can not sign package." />
             </then>
             <else>
                 <exec executable="gpg" passthru="true">
-                    <arg value="--yes"/>
-                    <arg value="--local-user"/>
-                    <arg value="${gpg.user}"/>
-                    <arg value="--armor"/>
-                    <arg value="--detach-sign"/>
+                    <arg value="--yes" />
+                    <arg value="--local-user" />
+                    <arg value="${gpg.user}" />
+                    <arg value="--armor" />
+                    <arg value="--detach-sign" />
                     <arg path="${build.target.package}" />
                 </exec>
             </else>
@@ -83,51 +101,51 @@
     </target>
 
     <target name="prepare" unless="prepare.done" description="Prepare for build" hidden="yes">
-        <mkdir dir="${project.basedir}/build"/>
-        <property name="prepare.done" value="true"/>
+        <mkdir dir="${project.basedir}/build" />
+        <property name="prepare.done" value="true" />
     </target>
 
     <target name="get-version-number-from-git" hidden="yes">
-        <property name="project.version" value=""/>
+        <property name="project.version" value="" />
         <trycatch property="error.message">
             <try>
-                <exec executable="git" outputProperty="git.version" checkreturn="true" dir="${project.basedir}">
+                <exec executable="git" outputProperty="git.version" checkreturn="true"
+                    dir="${project.basedir}">
                     <arg line="describe --abbrev=0 --tags" />
                 </exec>
-                <property name="project.version" value="${git.version}" override="true"/>
-                <echo message="Project version: ${git.version}"/>
+                <property name="project.version" value="${git.version}" override="true" />
+                <echo message="Project version: ${git.version}" />
             </try>
             <catch>
-                <echo level="error" message="Failed to get version from Git."/>
-                <echo level="error" message="${error.message}"/>
+                <echo level="error" message="Failed to get version from Git." />
+                <echo level="error" message="${error.message}" />
             </catch>
         </trycatch>
     </target>
 
     <target name="get-build-properties" hidden="true">
-        <property name="gpg.user" value=""/>
-        <property file="build.properties" override="true"/>
-        <property name="store.build.properties" value="false"/>
+        <property name="gpg.user" value="" />
+        <property file="build.properties" override="true" />
+        <property name="store.build.properties" value="false" />
         <if>
-            <equals arg1="${gpg.user}" arg2=""/>
+            <equals arg1="${gpg.user}" arg2="" />
             <then>
-                <propertyprompt promptText="Please provide GPG key user for package signing" propertyName="gpg.user"/>
-                <property name="store.build.properties" value="true" override="true"/>
+                <propertyprompt promptText="Please provide GPG key user for package signing"
+                    propertyName="gpg.user" />
+                <property name="store.build.properties" value="true" override="true" />
             </then>
         </if>
         <if>
-            <istrue value="${store.build.properties}"/>
+            <istrue value="${store.build.properties}" />
             <then>
-               <append destFile="build.properties" overwrite="true" append="false">
-                   # gpg key user for package signature
-                   gpg.user=${gpg.user}
-                   <filterchain>
-                      <replaceregexp>
-                        <regexp pattern="^[ \t]+|[ \t]+$" replace="" modifiers="m"/>
-                        <regexp pattern="^\s+|\s+$" replace=""/>
-                      </replaceregexp>
-                   </filterchain>
-               </append>
+                <append destFile="build.properties" overwrite="true" append="false"> # gpg key user
+                    for package signature gpg.user=${gpg.user} <filterchain>
+                        <replaceregexp>
+                            <regexp pattern="^[ \t]+|[ \t]+$" replace="" modifiers="m" />
+                            <regexp pattern="^\s+|\s+$" replace="" />
+                        </replaceregexp>
+                    </filterchain>
+                </append>
             </then>
         </if>
     </target>
@@ -243,4 +261,3 @@
     </adhoc-task>
 
 </project>
-
