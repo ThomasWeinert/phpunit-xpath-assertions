@@ -15,6 +15,7 @@ use PHPUnit\Framework\Constraint\IsTrue;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Xpath\Import\JsonToXml;
 use SebastianBergmann\Comparator\ComparisonFailure;
+use ReflectionClass;
 
 /**
  * Constraint that asserts that the result of an Xpath
@@ -26,10 +27,22 @@ class XpathEquals extends Xpath
 {
     private $_value;
 
+    /**
+     * @var int
+     * @todo REMOVE when dropping support for PHP 7.4 and sebastianbergmann/comparator v4
+     */
+    private static $_comparionFailureParams = 0;
+
     public function __construct($value, string $expression, array $namespaces = [])
     {
         parent::__construct($expression, $namespaces);
         $this->_value = $value;
+
+        if (static::$_comparionFailureParams === 0) {
+            static::$_comparionFailureParams = (new ReflectionClass(ComparisonFailure::class))
+                ->getConstructor()
+                ->getNumberOfParameters();
+        }
     }
 
     /**
@@ -64,12 +77,23 @@ class XpathEquals extends Xpath
             $actualAsString   = $this->nodesToText($actual);
 
             if ($expectedAsString !== $actualAsString) {
+                // @todo REMOVE when dropping support for PHP 7.4 and sebastianbergmann/comparator v4
+                if (static::$_comparionFailureParams === 6) {
+                    throw new ComparisonFailure(
+                        $this->_value,
+                        $actual,
+                        $expectedAsString,
+                        $actualAsString,
+                        false,
+                        "Failed asserting that two DOM structures are equal.\n"
+                    );
+                }
+
                 throw new ComparisonFailure(
                     $this->_value,
                     $actual,
                     $expectedAsString,
                     $actualAsString,
-                    false,
                     "Failed asserting that two DOM structures are equal.\n"
                 );
             }
