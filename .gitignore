@@ -8,3 +8,4 @@
 /vendor
 /build.properties
 .phpunit.result.cache
+.phpunit.cache
