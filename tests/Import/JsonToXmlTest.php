@@ -133,6 +133,10 @@ class JsonSerializable_Example implements \JsonSerializable
         $this->_data = $data;
     }
 
+    /**
+     * @return mixed
+     */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return $this->_data;
