@@ -51,7 +51,7 @@
         <fail unless="phar.readonly"
             message="Can't create PHAR: phar.readonly is enabled in PHP's INI file" />
 
-        <php expression="$_SERVER['_']" returnProperty="php.executable" level="debug" />
+        <php expression="PHP_BINARY" returnProperty="php.executable" level="debug" />
         <php expression="php_ini_loaded_file()" returnProperty="php.ini" level="debug" />
 
         <exec executable="${php.executable}">
@@ -74,6 +74,7 @@
                 <exclude name="*.phar" />
                 <exclude name="php.ini" />
                 <exclude name="build-phar" />
+                <exclude name="build-phar.bat" />
                 <exclude
                     name="*.phar.asc" />
             </fileset>
