@@ -1,16 +1,14 @@
-name: Unit Tests
+name: CI
 
 on:
   push:
-    branches:
-      - "*"
-    pull_request:
-      - "*"
+  pull_request:
+  release:
+    types: [created]
 
 jobs:
   unittest:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         # operating-system: [ubuntu-latest, windows-latest, macOS-latest]
@@ -28,9 +26,7 @@ jobs:
           - version: "8.4"
             composer-args: ""
         prefer-lowest: ["", "--prefer-lowest"]
-
     name: Unit Tests - PHP ${{ matrix.php.version }} ${{ matrix.prefer-lowest }}
-
     steps:
       - uses: actions/checkout@v4
 
@@ -65,16 +61,13 @@ jobs:
 
   build-phar:
     name: Build PHAR
-
+    if: github.repository == 'ThomasWeinert/phpunit-xpath-assertions'
     needs:
       - unittest
-
     runs-on: ubuntu-latest
-
     env:
       PHP_EXTENSIONS: none, dom, json, fileinfo, iconv, libxml, mbstring, phar, soap, tokenizer, xml, xmlwriter, curl
       PHP_INI_VALUES: assert.exception=1, phar.readonly=0, zend.assertions=1
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -82,7 +75,7 @@ jobs:
       - name: Install PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.1
+          php-version: 8.4
           coverage: none
           extensions: ${{ env.PHP_EXTENSIONS }}
           ini-values: ${{ env.PHP_INI_VALUES }}
@@ -93,12 +86,40 @@ jobs:
           composer update \
             --no-interaction --no-ansi --no-progress --prefer-dist
 
-      - name: Build PHAR
+      - name: Import GPG Key
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          echo "use-agent" >> ~/.gnupg/gpg.conf
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+
+      - name: Create PHAR
         run: ./build/build-phar build
+
+      - name: Sign PHAR
+        if: startsWith(github.ref, 'refs/tags/')
+        run: ./build/build-phar package
+        env:
+          GPG_USER: ${{ secrets.GPG_USER }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Upload PHAR
         uses: actions/upload-artifact@v4
         with:
           name: phpunit-xpath-assertions-phar
-          path: ./build/phpunit-*.phar
+          path: |
+            ./build/phpunit-*.phar
+            ./build/phpunit-*.phar.asc
           retention-days: 7
+
+      - name: Upload Release Assets
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            ./build/phpunit-xpath-assertions-*.phar
+            ./build/phpunit-xpath-assertions-*.phar.asc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

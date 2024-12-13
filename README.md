@@ -1,6 +1,6 @@
 # phpunit-xpath-assertions
 
-[![Unit Tests](https://github.com/ThomasWeinert/phpunit-xpath-assertions/actions/workflows/ci.yml/badge.svg)](https://github.com/ThomasWeinert/phpunit-xpath-assertions/actions/workflows/ci.yml)
+[![CI](https://github.com/ThomasWeinert/phpunit-xpath-assertions/actions/workflows/ci.yml/badge.svg)](https://github.com/ThomasWeinert/phpunit-xpath-assertions/actions/workflows/ci.yml)
 [![License](https://img.shields.io/packagist/l/thomasweinert/phpunit-xpath-assertions.svg)](https://github.com/thomasweinert/phpunit-xpath-assertions/blob/master/LICENSE)
 [![Total Downloads](https://img.shields.io/packagist/dt/thomasweinert/phpunit-xpath-assertions.svg)](https://packagist.org/packages/thomasweinert/phpunit-xpath-assertions)
 [![Latest Stable Version](https://img.shields.io/packagist/v/thomasweinert/phpunit-xpath-assertions.svg)](https://packagist.org/packages/thomasweinert/phpunit-xpath-assertions)
