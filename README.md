@@ -37,20 +37,6 @@ class MyProjectExampleTest extends TestCase
 
 ## Installation
 
-### Phar
-
-If you're using PHPUnit as a PHAR, you can download this extension as PHAR, too. They the are available on the
-[release page](https://github.com/ThomasWeinert/phpunit-xpath-assertions/releases). Download the extension `*.phar` file
-into a directory and provide the directory in the PHPUnit configuration file.
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
-         extensionsDirectory="tools/phpunit.d">
-</phpunit>
-```
-
 ### Composer
 
 If you use [Composer](https://getcomposer.org/) to manage the dependencies of your project then you can add the PHPUnit example extension as a development-time dependency to your project:
