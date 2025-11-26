@@ -15,16 +15,21 @@
         "ext-json": "*",
         "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0"
     },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.13"
+    },
     "autoload": {
         "classmap": [
             "src/"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "PHPUnit\\Xpath\\": "tests/"
+        }
+    },
     "scripts": {
         "test": ["@unittest"],
         "unittest": "phpunit"
-    },
-    "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.13"
     }
 }

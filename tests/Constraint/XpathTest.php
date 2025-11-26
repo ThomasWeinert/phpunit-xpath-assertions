@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of phpunit-xpath-assertions.
  *
@@ -7,54 +10,34 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace PHPUnit\Xpath\Constraint;
 
-require_once __DIR__ . '/../TestCase.php';
-
 use PHPUnit\Xpath\TestCase;
+use PHPUnit\Xpath\TestProxy;
+use DOMNodeList;
 
 class XpathTest extends TestCase
 {
-    public function testEvaluateXpathAgainstWithDocument()
+    public function testEvaluateXpathAgainstWithDocument(): void
     {
-        $constraint = new Xpath_TestProxy(
-            '//child'
-        );
-        $actual = $constraint->evaluateXpathAgainst($this->getXmlDocument());
-        $this->assertInstanceOf(\DOMNodeList::class, $actual);
+        $constraint = new TestProxy('//child');
+        $actual = $constraint->proxyEvaluateXpathAgainst($this->getXMLDocument());
+        $this->assertInstanceOf(DOMNodeList::class, $actual);
     }
 
-    public function testEvaluateXpathAgainstWithNode()
+    public function testEvaluateXpathAgainstWithNode(): void
     {
-        $constraint = new Xpath_TestProxy(
-            '//child'
-        );
-        $actual = $constraint->evaluateXpathAgainst($this->getXmlDocument()->documentElement);
-        $this->assertInstanceOf(\DOMNodeList::class, $actual);
+        $constraint = new TestProxy('//child');
+        $actual = $constraint->proxyEvaluateXpathAgainst($this->getXMLDocument()->documentElement);
+        $this->assertInstanceOf(DOMNodeList::class, $actual);
     }
 
-    public function testEvaluateXpathAgainstWithNodeAndNamespace()
+    public function testEvaluateXpathAgainstWithNodeAndNamespace(): void
     {
-        $constraint = new Xpath_TestProxy(
-            '//d:child', ['d' => 'urn:dummy']
-        );
-        $actual = $constraint->evaluateXpathAgainst($this->getXmlDocument()->documentElement);
-        $this->assertInstanceOf(\DOMNodeList::class, $actual);
+        $constraint = new TestProxy('//d:child', ['d' => 'urn:dummy']);
+        $actual = $constraint->proxyEvaluateXpathAgainst($this->getXMLDocument()->documentElement);
+        $this->assertInstanceOf(DOMNodeList::class, $actual);
         $this->assertCount(2, $actual);
-    }
-}
-
-class Xpath_TestProxy extends Xpath
-{
-    public function evaluateXpathAgainst($context)
-    {
-        return parent::evaluateXpathAgainst($context);
-    }
-    public function matches($other): bool
-    {
-    }
-    public function toString(): string
-    {
-        return '';
     }
 }

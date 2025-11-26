@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of phpunit-xpath-assertions.
  *
@@ -7,6 +10,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace PHPUnit\Xpath\Constraint;
 
 use PHPUnit\Framework\Constraint\IsEqual;
@@ -16,6 +20,10 @@ use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Xpath\Import\JsonToXml;
 use SebastianBergmann\Comparator\ComparisonFailure;
 use ReflectionClass;
+use PHPUnit\Framework\ExpectationFailedException as PHPUnitExpectationFailedException;
+use DOMNode;
+use DOMDocument;
+use DOMNodeList;
 
 /**
  * Constraint that asserts that the result of an Xpath
@@ -25,18 +33,16 @@ use ReflectionClass;
  */
 class XpathEquals extends Xpath
 {
-    private $_value;
-
     /**
      * @var int
      * @todo REMOVE when dropping support for PHP 7.4 and sebastianbergmann/comparator v4
      */
-    private static $_comparionFailureParams = 0;
+    private static int $_comparionFailureParams = 0;
 
-    public function __construct($value, string $expression, array $namespaces = [])
+    public function __construct(private mixed $value, string $expression, array $namespaces = [])
     {
         parent::__construct($expression, $namespaces);
-        $this->_value = $value;
+        $this->value = $value;
 
         if (static::$_comparionFailureParams === 0) {
             static::$_comparionFailureParams = (new ReflectionClass(ComparisonFailure::class))
@@ -46,51 +52,35 @@ class XpathEquals extends Xpath
     }
 
     /**
-     * @param mixed  $other        Value or object to evaluate.
-     * @param string $description
-     * @param bool   $returnResult
+     * @param mixed $other Value or object to evaluate.
      *
-     * @return bool
-     *
-     * @throws \PHPUnit\Framework\ExpectationFailedException
+     * @throws PHPUnitExpectationFailedException
      */
-    public function evaluate($other, string $description = '', bool $returnResult = false): ?bool
+    public function evaluate(mixed $other, string $description = '', bool $returnResult = false): ?bool
     {
         $actual = $this->evaluateXpathAgainst($other);
         try {
             if (\is_scalar($actual)) {
                 if (\is_bool($actual)) {
-                    $constraint = $this->_value ? new IsTrue() : new IsFalse();
+                    $constraint = $this->value ? new IsTrue() : new IsFalse();
                 } else {
-                    $constraint = new IsEqual($this->_value);
+                    $constraint = new IsEqual($this->value);
                 }
 
                 return $constraint->evaluate($actual, $description, $returnResult);
             }
-            if (\is_string($this->_value)) {
-                $this->_value = $this->loadXmlFragment($this->_value);
-            } elseif (!$this->isNodeOrNodeList($this->_value)) {
-                $importer     = new JsonToXml($this->_value);
-                $this->_value = $importer->getDocument()->documentElement->childNodes;
+            if (\is_string($this->value)) {
+                $this->value = $this->loadXmlFragment($this->value);
+            } elseif (!$this->isNodeOrNodeList($this->value)) {
+                $importer     = new JsonToXml($this->value);
+                $this->value = $importer->getDocument()->documentElement->childNodes;
             }
-            $expectedAsString = $this->nodesToText($this->_value);
+            $expectedAsString = $this->nodesToText($this->value);
             $actualAsString   = $this->nodesToText($actual);
 
             if ($expectedAsString !== $actualAsString) {
-                // @todo REMOVE when dropping support for PHP 7.4 and sebastianbergmann/comparator v4
-                if (static::$_comparionFailureParams === 6) {
-                    throw new ComparisonFailure(
-                        $this->_value,
-                        $actual,
-                        $expectedAsString,
-                        $actualAsString,
-                        false,
-                        "Failed asserting that two DOM structures are equal.\n"
-                    );
-                }
-
                 throw new ComparisonFailure(
-                    $this->_value,
+                    $this->value,
                     $actual,
                     $expectedAsString,
                     $actualAsString,
@@ -111,17 +101,17 @@ class XpathEquals extends Xpath
         }
     }
 
-    private function isNodeOrNodeList($value)
+    private function isNodeOrNodeList(mixed $value): bool
     {
         return
-            ($this->_value instanceof \DOMNodeList || $this->_value instanceof \DOMNode) ||
-            (\is_array($this->_value) && isset($this->_value[0]) && $this->_value[0] instanceof \DOMNode);
+            ($value instanceof DOMNodeList || $value instanceof DOMNode) ||
+            (\is_array($value) && isset($value[0]) && $value[0] instanceof DOMNode);
     }
 
-    private function nodesToText($nodes)
+    private function nodesToText(DOMNode|iterable $nodes): string|false
     {
         $fragmentString = '';
-        if ($nodes instanceof \DOMNode) {
+        if ($nodes instanceof DOMNode) {
             $fragmentString = $nodes->C14N();
         } elseif ($nodes instanceof \Traversable || \is_array($nodes)) {
             $fragmentString = '';
@@ -129,7 +119,8 @@ class XpathEquals extends Xpath
                 $fragmentString .= $node->C14N();
             }
         }
-        $document               = new \DOMDocument();
+
+        $document               = new DOMDocument();
         $document->formatOutput = true;
         $document->normalizeDocument();
         $fragment = $document->createDocumentFragment();
@@ -138,9 +129,9 @@ class XpathEquals extends Xpath
         return $document->saveXML($fragment);
     }
 
-    private function loadXmlFragment($xmlString)
+    private function loadXmlFragment(string $xmlString): DOMDocument
     {
-        $document = new \DOMDocument();
+        $document = new DOMDocument();
         $fragment = $document->createDocumentFragment();
         $fragment->appendXML($xmlString);
         $document->appendChild($fragment);
@@ -148,11 +139,8 @@ class XpathEquals extends Xpath
         return $document;
     }
 
-    /**
-     * @return string
-     */
     public function toString(): string
     {
-        return 'is equal to nodes matched by: ' . $this->_expression;
+        return 'is equal to nodes matched by: ' . $this->expression;
     }
 }

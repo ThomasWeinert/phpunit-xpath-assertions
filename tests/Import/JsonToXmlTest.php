@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of phpunit-xpath-assertions.
  *
@@ -7,28 +10,26 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace PHPUnit\Xpath\Import;
 
-require_once __DIR__ . '/../TestCase.php';
+namespace PHPUnit\Xpath\Import;
 
 use PHPUnit\Xpath\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Xpath\JsonSerializableExample;
 
 class JsonToXmlTest extends TestCase
 {
     /**
-     * @param string                            $xml
-     * @param \stdClass|array|\JsonSerializable $json
      * @dataProvider provideJsonToXmlPairs
      */
     #[DataProvider('provideJsonToXmlPairs')]
-    public function testImport(string $xml, $json)
+    public function testImport(string $xml, string $json): void
     {
         $import = new JsonToXml(\json_decode($json));
         $this->assertXmlStringEqualsXmlString($xml, $import->getDocument()->saveXML());
     }
 
-    public static function provideJsonToXmlPairs()
+    public static function provideJsonToXmlPairs(): array
     {
         return [
             'string' => [
@@ -71,16 +72,9 @@ class JsonToXmlTest extends TestCase
         ];
     }
 
-    public function testImportWithInvalidSourceExpectingException()
+    public function testImportWithJsonSerialzable(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid $json source.');
-        new JsonToXml('INVALID');
-    }
-
-    public function testImportWithJsonSerialzable()
-    {
-        $data = new JsonSerializable_Example(
+        $data = new JsonSerializableExample(
             [
                 'string' => 'hello',
                 'number' => 42
@@ -96,9 +90,9 @@ class JsonToXmlTest extends TestCase
         );
     }
 
-    public function testImportWithRecursionLimit()
+    public function testImportWithRecursionLimit(): void
     {
-        $data = new JsonSerializable_Example(
+        $data = new JsonSerializableExample(
             [
                 'level' => 1,
                 'child' => [
@@ -112,6 +106,7 @@ class JsonToXmlTest extends TestCase
                 ]
             ]
         );
+
         $import = new JsonToXml($data, 2);
         $this->assertXmlStringEqualsXmlString(
             '<_ type="object">' .
@@ -123,24 +118,5 @@ class JsonToXmlTest extends TestCase
             '</_>',
             $import->getDocument()->saveXML()
         );
-    }
-}
-
-class JsonSerializable_Example implements \JsonSerializable
-{
-    private $_data;
-
-    public function __construct($data)
-    {
-        $this->_data = $data;
-    }
-
-    /**
-     * @return mixed
-     */
-    #[\ReturnTypeWillChange]
-    public function jsonSerialize()
-    {
-        return $this->_data;
     }
 }

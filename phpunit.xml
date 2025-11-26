@@ -5,7 +5,8 @@
          beStrictAboutOutputDuringTests="true"
          cacheDirectory=".phpunit.cache"
          requireCoverageMetadata="false"
-         beStrictAboutCoverageMetadata="false">
+         beStrictAboutCoverageMetadata="false"
+         colors="true">
     <testsuite name="Extension Tests">
         <directory suffix="Test.php">tests</directory>
     </testsuite>

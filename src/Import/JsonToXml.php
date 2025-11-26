@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of phpunit-xpath-assertions.
  *
@@ -7,7 +10,12 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace PHPUnit\Xpath\Import;
+
+use DOMDocument;
+use DOMElement;
+use stdClass;
 
 /**
  * Import a JSON structure into DOM
@@ -23,31 +31,17 @@ class JsonToXml
     private const TYPE_OBJECT  = 'object';
     private const TYPE_ARRAY   = 'array';
 
-    /**
-     * @var mixed
-     */
-    private $_json;
-    private $_maxRecursions;
-
-    public function __construct($json, int $maxRecursions = 100)
+    public function __construct(private object|array $json, private int $maxRecursions = 100)
     {
-        if (!(\is_array($json) || \is_object($json))) {
-            throw new \InvalidArgumentException('Invalid $json source.');
-        }
-        $this->_json          = $json;
-        $this->_maxRecursions = \max(0, $maxRecursions);
+        $this->maxRecursions = \max(0, $maxRecursions);
     }
 
-    /**
-     * @return \DOMDocument
-     */
-    public function getDocument(): \DOMDocument
+    public function getDocument(): DOMDocument
     {
-        $document = new \DOMDocument('1.0', 'UTF-8');
-        $document->appendChild(
-            $root = $document->createElement(self::DEFAULT_QNAME)
-        );
-        $this->transferTo($root, $this->_json, $this->_maxRecursions);
+        $document = new DOMDocument('1.0', 'UTF-8');
+        $root = $document->createElement(self::DEFAULT_QNAME);
+        $document->appendChild($root);
+        $this->transferTo($root, $this->json, $this->maxRecursions);
 
         return $document;
     }
@@ -58,18 +52,14 @@ class JsonToXml
      *
      * If the current element is an object or array the method is called recursive.
      * The $recursions parameter is used to limit the recursion depth of this function.
-     *
-     * @param \DOMElement $target
-     * @param mixed       $value
-     * @param int         $recursions
      */
-    private function transferTo(\DOMElement $target, $value, int $recursions = 100): void
+    private function transferTo(DOMElement $target, mixed $value, int $recursions = 100): void
     {
-        if (\is_object($value) && !($value instanceof \stdClass)) {
+        if (\is_object($value) && !($value instanceof stdClass)) {
             $this->transferTo($target, \json_decode(\json_encode($value)), $recursions);
-
             return;
         }
+
         $type = $this->getTypeFromValue($value);
         $target->setAttribute('type', $type);
         $isComplex = ($type === self::TYPE_ARRAY || $type === self::TYPE_OBJECT);
@@ -93,12 +83,8 @@ class JsonToXml
 
     /**
      * Get the type from a variable value.
-     *
-     * @param mixed $value
-     *
-     * @return string
      */
-    private function getTypeFromValue($value): string
+    private function getTypeFromValue(mixed $value): string
     {
         if (\is_array($value)) {
             if (empty($value) || \array_keys($value) === \range(0, \count($value) - 1)) {
@@ -107,15 +93,19 @@ class JsonToXml
 
             return self::TYPE_OBJECT;
         }
+
         if (\is_object($value)) {
             return self::TYPE_OBJECT;
         }
+
         if (null === $value) {
             return self::TYPE_NULL;
         }
+
         if (\is_bool($value)) {
             return self::TYPE_BOOLEAN;
         }
+
         if (\is_int($value) || \is_float($value)) {
             return self::TYPE_NUMBER;
         }
@@ -125,11 +115,6 @@ class JsonToXml
 
     /**
      * Get a valid qualified name (tag name) using the property name/key.
-     *
-     * @param string $key
-     * @param string $default
-     *
-     * @return string
      */
     private function getQualifiedName(string $key, string $default): string
     {
@@ -154,13 +139,7 @@ class JsonToXml
         return empty($result) ? $default : $result;
     }
 
-    /**
-     * @param string $type
-     * @param mixed  $value
-     *
-     * @return null|string
-     */
-    private function getValueAsString(string $type, $value): ?string
+    private function getValueAsString(string $type, mixed $value): ?string
     {
         switch ($type) {
         case self::TYPE_NULL :
@@ -175,10 +154,6 @@ class JsonToXml
     /**
      * Transfer an array value into a target element node. Sets the json:type attribute to 'array' and
      * creates child element nodes for each array element using the default QName.
-     *
-     * @param \DOMElement $target
-     * @param array       $value
-     * @param int         $recursions
      */
     private function transferArrayTo(\DOMElement $target, array $value, int $recursions): void
     {
@@ -199,12 +174,8 @@ class JsonToXml
      * The method creates child nodes for each property. The property name will be normalized to a valid NCName.
      * If the normalized NCName is different from the property name or verbose is TRUE, a json:name attribute
      * with the property name will be added.
-     *
-     * @param \DOMElement $target
-     * @param mixed       $value
-     * @param int         $recursions
      */
-    private function transferObjectTo(\DOMElement $target, $value, int $recursions): void
+    private function transferObjectTo(DOMElement $target, mixed $value, int $recursions): void
     {
         $properties = \is_array($value) ? $value : \get_object_vars($value);
         foreach ($properties as $property => $item) {

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of phpunit-xpath-assertions.
  *
@@ -7,11 +10,19 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace PHPUnit\Xpath\Constraint;
 
 use PHPUnit\Framework\Constraint\Constraint as PHPUnitConstraint;
 use PHPUnit\Util\InvalidArgumentHelper;
 use PHPUnit\Xpath\Import\JsonToXml;
+use DOMNodeList;
+use DOMNode;
+use DOMDocument;
+use PHPUnit\Framework\Exception as PHPUnitException;
+use stdClass;
+use JsonSerializable;
+use DOMXPath;
 
 /**
  * Constraint superclass for constraints that uses Xpath expressions
@@ -20,70 +31,44 @@ use PHPUnit\Xpath\Import\JsonToXml;
  */
 abstract class Xpath extends PHPUnitConstraint
 {
-    /**
-     * @var string
-     */
-    protected $_expression;
-
-    /**
-     * @var array
-     */
-    private $_namespaces;
-
-    /**
-     * @param string $expression
-     * @param array  $namespaces
-     */
-    public function __construct($expression, array $namespaces = [])
+    public function __construct(protected string $expression, private array $namespaces = [])
     {
-        if (method_exists(PHPUnitConstraint::class, '__construct')) {
-            parent::__construct();
-        }
-        $this->_expression = $expression;
-        $this->_namespaces = $namespaces;
     }
 
     /**
      * Evaluate the xpath expression on the given context and
      * return the result.
-     *
-     * @param mixed $context
-     *
-     * @return \DOMNodeList|bool|string|float
      */
-    protected function evaluateXpathAgainst($context)
+    protected function evaluateXpathAgainst(mixed $context): DOMNodeList|bool|string|float
     {
-        if ($context instanceof \DOMNode) {
-            $document = $context instanceof \DOMDocument ? $context : $context->ownerDocument;
+        if ($context instanceof DOMNode) {
+            $document = $context instanceof DOMDocument ? $context : $context->ownerDocument;
         } else {
             $importer = new JsonToXml($context);
             $document = $importer->getDocument();
             $context  = $document->documentElement;
         }
 
-        $xpath = new \DOMXPath($document);
-        foreach ($this->_namespaces as $prefix=>$namespaceURI) {
+        $xpath = new DOMXPath($document);
+        foreach ($this->namespaces as $prefix=>$namespaceURI) {
             $xpath->registerNamespace($prefix, $namespaceURI);
         }
 
-        return $xpath->evaluate($this->_expression, $context, false);
+        return $xpath->evaluate($this->expression, $context, false);
     }
 
     /**
-     * @param mixed $context
-     * @param int   $argument
-     *
-     * @throws \PHPUnit\Framework\Exception
+     * @throws PHPUnitException
      */
-    public static function isValidContext($context, int $argument)
+    public static function isValidContext(mixed $context, int $argument): void
     {
         if (
-        !(
-            $context instanceof \DOMNode ||
-            \is_array($context) ||
-            $context instanceof \stdClass ||
-            $context instanceof \JsonSerializable
-        )
+            !(
+                $context instanceof DOMNode ||
+                \is_array($context) ||
+                $context instanceof stdClass ||
+                $context instanceof JsonSerializable
+            )
         ) {
             throw InvalidArgumentHelper::factory(
                 $argument,

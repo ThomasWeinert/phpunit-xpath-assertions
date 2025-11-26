@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of phpunit-xpath-assertions.
  *
@@ -10,8 +13,6 @@
 
 namespace PHPUnit\Xpath\Constraint;
 
-require_once __DIR__ . '/../TestCase.php';
-
 use PHPUnit\Xpath\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -19,18 +20,15 @@ final class XpathMatchTest extends TestCase
 {
     /**
      * @dataProvider provideMatchingExpressions
-     *
-     * @param string $expression
-     * @param array  $namespaces
      */
     #[DataProvider('provideMatchingExpressions')]
-    public function testXpathMatchExpectTrue(string $expression, array $namespaces = [])
+    public function testXpathMatchExpectTrue(string $expression, array $namespaces = []): void
     {
         $constraint = new XpathMatch($expression, $namespaces);
         $this->assertTrue($constraint->evaluate($this->getXMLDocument(), '', true));
     }
 
-    public static function provideMatchingExpressions()
+    public static function provideMatchingExpressions(): array
     {
         return [
             ['expression' => '/root', 'namespaces' => []],
@@ -43,18 +41,15 @@ final class XpathMatchTest extends TestCase
     }
     /**
      * @dataProvider provideNonMatchingExpressions
-     *
-     * @param string $expression
-     * @param array  $namespaces
      */
     #[DataProvider('provideNonMatchingExpressions')]
-    public function testXpathMatchExpectFalse(string $expression, array $namespaces = [])
+    public function testXpathMatchExpectFalse(string $expression, array $namespaces = []): void
     {
         $constraint = new XpathMatch($expression, $namespaces);
         $this->assertFalse($constraint->evaluate($this->getXMLDocument(), '', true));
     }
 
-    public static function provideNonMatchingExpressions()
+    public static function provideNonMatchingExpressions(): array
     {
         return [
             ['expression' => '/child', 'namespaces' => []],

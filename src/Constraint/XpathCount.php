@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of phpunit-xpath-assertions.
  *
@@ -7,6 +10,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace PHPUnit\Xpath\Constraint;
 
 /**
@@ -17,45 +21,40 @@ namespace PHPUnit\Xpath\Constraint;
  */
 class XpathCount extends Xpath
 {
-    private $_expectedCount;
-    private $_actualCount = 0;
+    private int $actualCount = 0;
 
-    public function __construct(int $expectedCount, string $expression, array $namespaces = [])
+    public function __construct(private int $expectedCount, string $expression, array $namespaces = [])
     {
         parent::__construct($expression, $namespaces);
-        $this->_expectedCount = $expectedCount;
+        $this->expectedCount = $expectedCount;
     }
 
     /**
      * @param mixed $other Value or object to evaluate.
-     *
-     * @return bool
      */
-    protected function matches($other): bool
+    protected function matches(mixed $other): bool
     {
-        $actual             = $this->evaluateXpathAgainst($other);
-        $this->_actualCount = $actual->length;
+        $actual = $this->evaluateXpathAgainst($other);
 
-        return $this->_actualCount === $this->_expectedCount;
+        $this->actualCount = $actual->length;
+
+        return $this->actualCount === $this->expectedCount;
     }
 
-    protected function failureDescription($other): string
+    protected function failureDescription(mixed $other): string
     {
         return \sprintf(
             'actual node count %d matches expected count %d',
-            $this->_actualCount,
-            $this->_expectedCount
+            $this->actualCount,
+            $this->expectedCount
         );
     }
 
-    /**
-     * @return string
-     */
     public function toString(): string
     {
         return \sprintf(
             'count matches %d',
-            $this->_expectedCount
+            $this->expectedCount
         );
     }
 }
