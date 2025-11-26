@@ -51,7 +51,7 @@
         <fail unless="phar.readonly"
             message="Can't create PHAR: phar.readonly is enabled in PHP's INI file" />
 
-        <php expression="$_SERVER['_']" returnProperty="php.executable" level="debug" />
+        <php expression="PHP_BINARY" returnProperty="php.executable" level="debug" />
         <php expression="php_ini_loaded_file()" returnProperty="php.ini" level="debug" />
 
         <exec executable="${php.executable}">
@@ -74,6 +74,7 @@
                 <exclude name="*.phar" />
                 <exclude name="php.ini" />
                 <exclude name="build-phar" />
+                <exclude name="build-phar.bat" />
                 <exclude
                     name="*.phar.asc" />
             </fileset>
@@ -90,8 +91,12 @@
             <else>
                 <exec executable="gpg" passthru="true">
                     <arg value="--yes" />
+                    <arg value="--pinentry-mode" />
+                    <arg value="loopback" />
                     <arg value="--local-user" />
                     <arg value="${gpg.user}" />
+                    <arg value="--passphrase" />
+                    <arg value="$GPG_PASSPHRASE" />
                     <arg value="--armor" />
                     <arg value="--detach-sign" />
                     <arg path="${build.target.package}" />
@@ -125,8 +130,20 @@
 
     <target name="get-build-properties" hidden="true">
         <property name="gpg.user" value="" />
+        <property name="gpg.passphrase" value="" />
         <property file="build.properties" override="true" />
         <property name="store.build.properties" value="false" />
+        <property environment="env" />
+
+        <if>
+            <not>
+                <equals arg1="${env.GPG_USER}" arg2=""/>
+            </not>
+            <then>
+                <property name="gpg.user" value="${env.GPG_USER}" override="true" />
+            </then>
+        </if>
+
         <if>
             <equals arg1="${gpg.user}" arg2="" />
             <then>
