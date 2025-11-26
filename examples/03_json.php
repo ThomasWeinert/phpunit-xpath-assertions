@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__.'/../vendor/autoload.php';
-
 class MyProjectExampleTest extends \PHPUnit\Framework\TestCase
 {
     use \PHPUnit\Xpath\Assert;

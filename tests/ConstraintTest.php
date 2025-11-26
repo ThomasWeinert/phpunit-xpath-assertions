@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of phpunit-xpath-assertions.
  *
@@ -9,13 +12,11 @@
  */
 namespace PHPUnit\Xpath;
 
-require_once __DIR__ . '/TestCase.php';
-
 class ConstraintTest extends TestCase
 {
     use Constraint;
 
-    public function testAssertXpathMatchSuccess()
+    public function testAssertXpathMatchSuccess(): void
     {
         self::assertThat(
             $this->getXMLDocument(),
@@ -23,7 +24,7 @@ class ConstraintTest extends TestCase
         );
     }
 
-    public function testAssertXpathCountSuccess()
+    public function testAssertXpathCountSuccess(): void
     {
         self::assertThat(
             $this->getXMLDocument(),
@@ -31,7 +32,7 @@ class ConstraintTest extends TestCase
         );
     }
 
-    public function testAssertXpathEqualsSuccess()
+    public function testAssertXpathEqualsSuccess(): void
     {
         $expected = $this->getXMLDocument()->documentElement->firstChild;
         self::assertThat(
@@ -40,7 +41,7 @@ class ConstraintTest extends TestCase
         );
     }
 
-    public function testAssertXpathEqualsWithNamespaceSuccess()
+    public function testAssertXpathEqualsWithNamespaceSuccess(): void
     {
         $expected = $this->getXMLDocument()->documentElement->childNodes;
         self::assertThat(
@@ -49,7 +50,7 @@ class ConstraintTest extends TestCase
         );
     }
 
-    public function testAssertXpathEqualsWithStringSuccess()
+    public function testAssertXpathEqualsWithStringSuccess(): void
     {
         self::assertThat(
             $this->getXMLDocument(),
@@ -57,7 +58,7 @@ class ConstraintTest extends TestCase
         );
     }
 
-    public function testAssertXpathEqualsWithTrueSuccess()
+    public function testAssertXpathEqualsWithTrueSuccess(): void
     {
         self::assertThat(
             $this->getXMLDocument(),
@@ -65,7 +66,7 @@ class ConstraintTest extends TestCase
         );
     }
 
-    public function testAssertXpathEqualsWithFalseSuccess()
+    public function testAssertXpathEqualsWithFalseSuccess(): void
     {
         self::assertThat(
             $this->getXMLDocument(),
@@ -73,7 +74,7 @@ class ConstraintTest extends TestCase
         );
     }
 
-    public function testAssertXpathEqualsWithTrueFailure()
+    public function testAssertXpathEqualsWithTrueFailure(): void
     {
         self::assertThat(
             $this->getXMLDocument(),
