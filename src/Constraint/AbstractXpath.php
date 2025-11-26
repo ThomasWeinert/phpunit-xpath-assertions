@@ -13,23 +13,25 @@ declare(strict_types=1);
 
 namespace PHPUnit\Xpath\Constraint;
 
+use DOMDocument;
+use DOMNode;
+use DOMNodeList;
+use DOMXPath;
+use JsonSerializable;
 use PHPUnit\Framework\Constraint\Constraint as PHPUnitConstraint;
+use PHPUnit\Framework\Exception as PHPUnitException;
 use PHPUnit\Util\InvalidArgumentHelper;
 use PHPUnit\Xpath\Import\JsonToXml;
-use DOMNodeList;
-use DOMNode;
-use DOMDocument;
-use PHPUnit\Framework\Exception as PHPUnitException;
 use stdClass;
-use JsonSerializable;
-use DOMXPath;
+
+use function is_array;
 
 /**
  * Constraint superclass for constraints that uses Xpath expressions
  *
  * The Xpath expression and namespaces are passed in the constructor.
  */
-abstract class Xpath extends PHPUnitConstraint
+abstract class AbstractXpath extends PHPUnitConstraint
 {
     public function __construct(protected string $expression, private array $namespaces = [])
     {
@@ -50,8 +52,8 @@ abstract class Xpath extends PHPUnitConstraint
         }
 
         $xpath = new DOMXPath($document);
-        foreach ($this->namespaces as $prefix=>$namespaceURI) {
-            $xpath->registerNamespace($prefix, $namespaceURI);
+        foreach ($this->namespaces as $prefix => $namespaceUri) {
+            $xpath->registerNamespace($prefix, $namespaceUri);
         }
 
         return $xpath->evaluate($this->expression, $context, false);
@@ -63,9 +65,9 @@ abstract class Xpath extends PHPUnitConstraint
     public static function isValidContext(mixed $context, int $argument): void
     {
         if (
-            !(
+            ! (
                 $context instanceof DOMNode ||
-                \is_array($context) ||
+                is_array($context) ||
                 $context instanceof stdClass ||
                 $context instanceof JsonSerializable
             )

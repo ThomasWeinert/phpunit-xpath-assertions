@@ -1,5 +1,6 @@
 /.idea
 /.php_cs.cache
+.phpcs-cache
 /build/files/
 /build/*.phar
 /build/*.phar.asc

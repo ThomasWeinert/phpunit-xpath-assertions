@@ -15,9 +15,9 @@ namespace PHPUnit\Xpath;
 
 use PHPUnit\Framework\AssertionFailedError;
 
-class AssertTest extends TestCase
+class AssertTraitTest extends TestCase
 {
-    use Assert;
+    use AssertTrait;
 
     public function testAssertXpathMatchSuccess(): void
     {

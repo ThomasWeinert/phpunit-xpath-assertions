@@ -13,21 +13,22 @@ declare(strict_types=1);
 
 namespace PHPUnit\Xpath;
 
-use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 use DOMDocument;
+use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 class TestCase extends PHPUnitTestCase
 {
-    const XML =
+    public const XML =
         '<root>
             <child>One</child>
             <child xmlns="urn:dummy">Two</child>
             <ns1:child xmlns:ns1="urn:dummy">Three</ns1:child>
         </root>';
 
-    public function getXMLDocument($xml = self::XML): DOMDocument
+    public function getXMLDocument(string $xml = self::XML): DOMDocument
     {
-        $document                     = new \DOMDocument();
+        $document = new DOMDocument();
+
         $document->preserveWhiteSpace = false;
         $document->loadXML($xml);
 

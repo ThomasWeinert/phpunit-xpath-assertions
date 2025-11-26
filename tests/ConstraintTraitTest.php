@@ -10,11 +10,12 @@ declare(strict_types=1);
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace PHPUnit\Xpath;
 
-class ConstraintTest extends TestCase
+class ConstraintTraitTest extends TestCase
 {
-    use Constraint;
+    use ConstraintTrait;
 
     public function testAssertXpathMatchSuccess(): void
     {

@@ -13,21 +13,24 @@ declare(strict_types=1);
 
 namespace PHPUnit\Xpath;
 
+use ArrayAccess;
+use DOMNode;
+use JsonSerializable;
+use PHPUnit\Framework\Exception as PHPUnitException;
 use PHPUnit\Util\InvalidArgumentHelper;
-use PHPUnit\Xpath\Constraint\Xpath;
+use PHPUnit\Xpath\Constraint\AbstractXpath;
 use PHPUnit\Xpath\Constraint\XpathCount;
 use PHPUnit\Xpath\Constraint\XpathEquals;
 use PHPUnit\Xpath\Constraint\XpathMatch;
-use DOMNode;
 use stdClass;
-use JsonSerializable;
-use PHPUnit\Framework\Exception as PHPUnitException;
-use ArrayAccess;
+
+use function is_int;
+use function is_string;
 
 /**
  * Trait that with Xpath based assertions
  */
-trait Assert
+trait AssertTrait
 {
     /**
      * Asserts that DOM node matches a specified Xpath expression.
@@ -40,7 +43,7 @@ trait Assert
         array|ArrayAccess $namespaces = [],
         string $message = ''
     ): void {
-        Xpath::isValidContext($context, 2);
+        AbstractXpath::isValidContext($context, 2);
 
         $constraint = new XpathMatch($expression, $namespaces);
         static::assertThat($context, $constraint, $message);
@@ -58,14 +61,14 @@ trait Assert
         array|ArrayAccess $namespaces = [],
         string $message = ''
     ): void {
-        if (!(\is_int($expected) || \is_string($expected))) {
+        if (! (is_int($expected) || is_string($expected))) {
             throw InvalidArgumentHelper::factory(
                 1,
                 'integer or string'
             );
         }
 
-        Xpath::isValidContext($context, 3);
+        AbstractXpath::isValidContext($context, 3);
 
         $constraint = new XpathCount($expected, $expression, $namespaces);
         static::assertThat($context, $constraint, $message);
@@ -83,7 +86,7 @@ trait Assert
         array|ArrayAccess $namespaces = [],
         string $message = ''
     ): void {
-        Xpath::isValidContext($context, 3);
+        AbstractXpath::isValidContext($context, 3);
 
         $constraint = new XpathEquals($expected, $expression, $namespaces);
         static::assertThat($context, $constraint, $message);

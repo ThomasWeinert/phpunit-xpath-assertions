@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PHPUnit\Xpath;
 
 use JsonSerializable;
+use ReturnTypeWillChange;
 
 class JsonSerializableExample implements JsonSerializable
 {
@@ -12,7 +13,7 @@ class JsonSerializableExample implements JsonSerializable
     {
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function jsonSerialize(): mixed
     {
         return $this->data;

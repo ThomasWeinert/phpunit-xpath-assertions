@@ -13,17 +13,23 @@ declare(strict_types=1);
 
 namespace PHPUnit\Xpath\Constraint;
 
+use DOMDocument;
+use DOMNode;
+use DOMNodeList;
 use PHPUnit\Framework\Constraint\IsEqual;
 use PHPUnit\Framework\Constraint\IsFalse;
 use PHPUnit\Framework\Constraint\IsTrue;
 use PHPUnit\Framework\ExpectationFailedException;
+use PHPUnit\Framework\ExpectationFailedException as PHPUnitExpectationFailedException;
 use PHPUnit\Xpath\Import\JsonToXml;
 use SebastianBergmann\Comparator\ComparisonFailure;
-use ReflectionClass;
-use PHPUnit\Framework\ExpectationFailedException as PHPUnitExpectationFailedException;
-use DOMNode;
-use DOMDocument;
-use DOMNodeList;
+use Traversable;
+
+use function is_array;
+use function is_bool;
+use function is_scalar;
+use function is_string;
+use function trim;
 
 /**
  * Constraint that asserts that the result of an Xpath
@@ -31,37 +37,24 @@ use DOMNodeList;
  *
  * The Xpath expression and namespaces are passed in the constructor.
  */
-class XpathEquals extends Xpath
+class XpathEquals extends AbstractXpath
 {
-    /**
-     * @var int
-     * @todo REMOVE when dropping support for PHP 7.4 and sebastianbergmann/comparator v4
-     */
-    private static int $_comparionFailureParams = 0;
-
     public function __construct(private mixed $value, string $expression, array $namespaces = [])
     {
         parent::__construct($expression, $namespaces);
         $this->value = $value;
-
-        if (static::$_comparionFailureParams === 0) {
-            static::$_comparionFailureParams = (new ReflectionClass(ComparisonFailure::class))
-                ->getConstructor()
-                ->getNumberOfParameters();
-        }
     }
 
     /**
      * @param mixed $other Value or object to evaluate.
-     *
      * @throws PHPUnitExpectationFailedException
      */
     public function evaluate(mixed $other, string $description = '', bool $returnResult = false): ?bool
     {
         $actual = $this->evaluateXpathAgainst($other);
         try {
-            if (\is_scalar($actual)) {
-                if (\is_bool($actual)) {
+            if (is_scalar($actual)) {
+                if (is_bool($actual)) {
                     $constraint = $this->value ? new IsTrue() : new IsFalse();
                 } else {
                     $constraint = new IsEqual($this->value);
@@ -69,10 +62,10 @@ class XpathEquals extends Xpath
 
                 return $constraint->evaluate($actual, $description, $returnResult);
             }
-            if (\is_string($this->value)) {
+            if (is_string($this->value)) {
                 $this->value = $this->loadXmlFragment($this->value);
-            } elseif (!$this->isNodeOrNodeList($this->value)) {
-                $importer     = new JsonToXml($this->value);
+            } elseif (! $this->isNodeOrNodeList($this->value)) {
+                $importer    = new JsonToXml($this->value);
                 $this->value = $importer->getDocument()->documentElement->childNodes;
             }
             $expectedAsString = $this->nodesToText($this->value);
@@ -95,7 +88,7 @@ class XpathEquals extends Xpath
             }
 
             throw new ExpectationFailedException(
-                \trim($description . "\n" . $f->getMessage()),
+                trim($description . "\n" . $f->getMessage()),
                 $f
             );
         }
@@ -103,9 +96,8 @@ class XpathEquals extends Xpath
 
     private function isNodeOrNodeList(mixed $value): bool
     {
-        return
-            ($value instanceof DOMNodeList || $value instanceof DOMNode) ||
-            (\is_array($value) && isset($value[0]) && $value[0] instanceof DOMNode);
+        return ($value instanceof DOMNodeList || $value instanceof DOMNode) ||
+            (is_array($value) && isset($value[0]) && $value[0] instanceof DOMNode);
     }
 
     private function nodesToText(DOMNode|iterable $nodes): string|false
@@ -113,7 +105,7 @@ class XpathEquals extends Xpath
         $fragmentString = '';
         if ($nodes instanceof DOMNode) {
             $fragmentString = $nodes->C14N();
-        } elseif ($nodes instanceof \Traversable || \is_array($nodes)) {
+        } elseif ($nodes instanceof Traversable || is_array($nodes)) {
             $fragmentString = '';
             foreach ($nodes as $node) {
                 $fragmentString .= $node->C14N();

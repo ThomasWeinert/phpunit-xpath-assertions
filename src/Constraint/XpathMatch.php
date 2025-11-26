@@ -15,13 +15,15 @@ namespace PHPUnit\Xpath\Constraint;
 
 use DOMNodeList;
 
+use function sprintf;
+
 /**
  * Constraint that asserts that the result of an Xpath
  * expression is TRUE and not empty.
  *
  * The Xpath expression and namespaces are passed in the constructor.
  */
-class XpathMatch extends Xpath
+class XpathMatch extends AbstractXpath
 {
     /**
      * @param mixed $other Value or object to evaluate.
@@ -38,7 +40,7 @@ class XpathMatch extends Xpath
 
     public function toString(): string
     {
-        return \sprintf(
+        return sprintf(
             'matches expression: %s',
             $this->expression
         );

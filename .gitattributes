@@ -5,7 +5,6 @@ tests/ export-ignore
 .gitignore export-ignore
 .gitattribues export-ignore
 .editorconfig export-ignore
-.php_cs export-ignore
 build.xml export-ignore
 dist.build.properties export-ignore
 mainfest.xml.in export-ignore
