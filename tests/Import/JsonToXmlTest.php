@@ -13,9 +13,11 @@ declare(strict_types=1);
 
 namespace PHPUnit\Xpath\Import;
 
-use PHPUnit\Xpath\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Xpath\JsonSerializableExample;
+use PHPUnit\Xpath\TestCase;
+
+use function json_decode;
 
 class JsonToXmlTest extends TestCase
 {
@@ -25,67 +27,67 @@ class JsonToXmlTest extends TestCase
     #[DataProvider('provideJsonToXmlPairs')]
     public function testImport(string $xml, string $json): void
     {
-        $import = new JsonToXml(\json_decode($json));
+        $import = new JsonToXml(json_decode($json));
         $this->assertXmlStringEqualsXmlString($xml, $import->getDocument()->saveXML());
     }
 
     public static function provideJsonToXmlPairs(): array
     {
         return [
-            'string' => [
+            'string'        => [
                 '<_ type="object"><foo name="foo" type="string">bar</foo></_>',
-                '{"foo":"bar"}'
+                '{"foo":"bar"}',
             ],
-            'number' => [
+            'number'        => [
                 '<_ type="object"><foo name="foo" type="number">42</foo></_>',
-                '{"foo":42}'
+                '{"foo":42}',
             ],
-            'boolean true' => [
+            'boolean true'  => [
                 '<_ type="object"><foo name="foo" type="boolean">true</foo></_>',
-                '{"foo":true}'
+                '{"foo":true}',
             ],
             'boolean false' => [
                 '<_ type="object"><foo name="foo" type="boolean">false</foo></_>',
-                '{"foo":false}'
+                '{"foo":false}',
             ],
-            'null' => [
+            'null'          => [
                 '<_ type="object"><foo name="foo" type="null"></foo></_>',
-                '{"foo":null}'
+                '{"foo":null}',
             ],
-            'empty string' => [
+            'empty string'  => [
                 '<_ type="object"><foo name="foo" type="string"></foo></_>',
-                '{"foo":""}'
+                '{"foo":""}',
             ],
-            'empty object' => [
+            'empty object'  => [
                 '<_ type="object"><foo name="foo" type="object"></foo></_>',
-                '{"foo":{}}'
+                '{"foo":{}}',
             ],
-            'array' => [
-                '<_ type="object">' .
-                '  <foo name="foo" type="array">' .
-                '    <_ type="number">21</_>' .
-                '    <_ type="number">42</_>' .
-                '  </foo>' .
-                '</_>',
-                '{"foo": [21, 42] }'
-            ]
+            'array'         => [
+                '<_ type="object">'
+                . '  <foo name="foo" type="array">'
+                . '    <_ type="number">21</_>'
+                . '    <_ type="number">42</_>'
+                . '  </foo>'
+                . '</_>',
+                '{"foo": [21, 42] }',
+            ],
         ];
     }
 
     public function testImportWithJsonSerialzable(): void
     {
-        $data = new JsonSerializableExample(
+        $data   = new JsonSerializableExample(
             [
                 'string' => 'hello',
-                'number' => 42
+                'number' => 42,
             ]
         );
         $import = new JsonToXml($data);
         $this->assertXmlStringEqualsXmlString(
-            '<_ type="object">' .
-            '  <string name="string" type="string">hello</string>' .
-            '  <number name="number" type="number">42</number>' .
-            '</_>',
+            '<_ type="object">'
+            . '  <string name="string" type="string">hello</string>'
+            . '  <number name="number" type="number">42</number>'
+            . '</_>',
             $import->getDocument()->saveXML()
         );
     }
@@ -100,22 +102,22 @@ class JsonToXmlTest extends TestCase
                     'child' => [
                         'level' => 3,
                         'child' => [
-                            'level' => 4
-                        ]
-                    ]
-                ]
+                            'level' => 4,
+                        ],
+                    ],
+                ],
             ]
         );
 
         $import = new JsonToXml($data, 2);
         $this->assertXmlStringEqualsXmlString(
-            '<_ type="object">' .
-            '  <level name="level" type="number">1</level>' .
-            '  <child name="child" type="object">' .
-            '    <level name="level" type="number">2</level>' .
-            '    <child name="child" type="object"/>' .
-            '  </child>' .
-            '</_>',
+            '<_ type="object">'
+            . '  <level name="level" type="number">1</level>'
+            . '  <child name="child" type="object">'
+            . '    <level name="level" type="number">2</level>'
+            . '    <child name="child" type="object"/>'
+            . '  </child>'
+            . '</_>',
             $import->getDocument()->saveXML()
         );
     }

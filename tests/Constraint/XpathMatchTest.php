@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace PHPUnit\Xpath\Constraint;
 
-use PHPUnit\Xpath\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Xpath\TestCase;
 
 final class XpathMatchTest extends TestCase
 {
@@ -39,6 +39,7 @@ final class XpathMatchTest extends TestCase
             ['expression' => 'count(//test:child)', 'namespaces' => ['test' => 'urn:dummy']],
         ];
     }
+
     /**
      * @dataProvider provideNonMatchingExpressions
      */

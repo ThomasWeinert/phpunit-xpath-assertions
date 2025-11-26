@@ -16,12 +16,14 @@
         "phpunit/phpunit": "^10.0 || ^11.0 || ^12.0"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.13"
+        "friendsofphp/php-cs-fixer": "^3.13",
+        "squizlabs/php_codesniffer": "^3.13",
+        "laminas/laminas-coding-standard": "^3.1"
     },
     "autoload": {
-        "classmap": [
-            "src/"
-        ]
+         "psr-4": {
+            "PHPUnit\\Xpath\\": "src/"
+        }
     },
     "autoload-dev": {
         "psr-4": {
@@ -29,7 +31,12 @@
         }
     },
     "scripts": {
-        "test": ["@unittest"],
+        "test": ["@unittest", "phpcs --colors"],
         "unittest": "phpunit"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }
