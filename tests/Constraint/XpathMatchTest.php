@@ -13,8 +13,9 @@ namespace PHPUnit\Xpath\Constraint;
 require_once __DIR__ . '/../TestCase.php';
 
 use PHPUnit\Xpath\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-class XpathMatchTest extends TestCase
+final class XpathMatchTest extends TestCase
 {
     /**
      * @dataProvider provideMatchingExpressions
@@ -22,6 +23,7 @@ class XpathMatchTest extends TestCase
      * @param string $expression
      * @param array  $namespaces
      */
+    #[DataProvider('provideMatchingExpressions')]
     public function testXpathMatchExpectTrue(string $expression, array $namespaces = [])
     {
         $constraint = new XpathMatch($expression, $namespaces);
@@ -31,12 +33,12 @@ class XpathMatchTest extends TestCase
     public static function provideMatchingExpressions()
     {
         return [
-            ['/root'],
-            ['//child'],
-            ['//test:child', ['test' => 'urn:dummy']],
-            ['//child = "One"'],
-            ['string(//child)'],
-            ['count(//test:child)', ['test' => 'urn:dummy']],
+            ['expression' => '/root', 'namespaces' => []],
+            ['expression' => '//child', 'namespaces' => []],
+            ['expression' => '//test:child', 'namespaces' => ['test' => 'urn:dummy']],
+            ['expression' => '//child = "One"', 'namespaces' => []],
+            ['expression' => 'string(//child)', 'namespaces' => []],
+            ['expression' => 'count(//test:child)', 'namespaces' => ['test' => 'urn:dummy']],
         ];
     }
     /**
@@ -45,6 +47,7 @@ class XpathMatchTest extends TestCase
      * @param string $expression
      * @param array  $namespaces
      */
+    #[DataProvider('provideNonMatchingExpressions')]
     public function testXpathMatchExpectFalse(string $expression, array $namespaces = [])
     {
         $constraint = new XpathMatch($expression, $namespaces);
@@ -54,12 +57,12 @@ class XpathMatchTest extends TestCase
     public static function provideNonMatchingExpressions()
     {
         return [
-            ['/child'],
-            ['//non-existing'],
-            ['//test:child', ['test' => 'urn:non-existing']],
-            ['//child = "NON-EXISTING"'],
-            ['string(//non-existing)'],
-            ['count(//test:child)', ['test' => 'urn:non-existing']],
+            ['expression' => '/child', 'namespaces' => []],
+            ['expression' => '//non-existing', 'namespaces' => []],
+            ['expression' => '//test:child', 'namespaces' => ['test' => 'urn:non-existing']],
+            ['expression' => '//child = "NON-EXISTING"', 'namespaces' => []],
+            ['expression' => 'string(//non-existing)', 'namespaces' => []],
+            ['expression' => 'count(//test:child)', 'namespaces' => ['test' => 'urn:non-existing']],
         ];
     }
 }

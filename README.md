@@ -209,13 +209,3 @@ public function testHomePhoneNumbersEqualsExpected()
 # Contributing
 
 Contributions are welcome, please use the issue tracker to report bug and feature ideas.
-
-## Build a modified phar
-
-This project includes build scripts to create your own phar file.
-To create a phar call `./build/build-phar`.
-
-### Build a signed phar
-
-To create a signed phar copy the `dist.build.properties` to `build.properties` and
-set the `gpg.user`. After that call `./build/build-phar package`.

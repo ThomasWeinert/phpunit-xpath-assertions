@@ -6,14 +6,13 @@
          cacheDirectory=".phpunit.cache"
          requireCoverageMetadata="false"
          beStrictAboutCoverageMetadata="false">
+    <testsuite name="Extension Tests">
+        <directory suffix="Test.php">tests</directory>
+    </testsuite>
 
     <coverage>
         <include>
             <directory suffix=".php">src</directory>
         </include>
     </coverage>
-
-    <testsuite name="Extension Tests">
-        <directory suffix="Test.php">tests</directory>
-    </testsuite>
 </phpunit>

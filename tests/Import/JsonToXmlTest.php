@@ -12,6 +12,7 @@ namespace PHPUnit\Xpath\Import;
 require_once __DIR__ . '/../TestCase.php';
 
 use PHPUnit\Xpath\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class JsonToXmlTest extends TestCase
 {
@@ -20,6 +21,7 @@ class JsonToXmlTest extends TestCase
      * @param \stdClass|array|\JsonSerializable $json
      * @dataProvider provideJsonToXmlPairs
      */
+    #[DataProvider('provideJsonToXmlPairs')]
     public function testImport(string $xml, $json)
     {
         $import = new JsonToXml(\json_decode($json));
