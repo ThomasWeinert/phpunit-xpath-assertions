@@ -11,7 +11,7 @@ Xpath assertions and constraints for use with PHPUnit.
 
 ```php
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Xpath\Assert as XpathAssertions;
+use PHPUnit\Xpath\AssertTrait as XpathAssertions;
 
 class MyProjectExampleTest extends TestCase
 {
@@ -50,8 +50,8 @@ $ composer require --dev thomasweinert/phpunit-xpath-assertions
 The library provides traits that you can use to add the assertions to your TestCase.
 
 ```php
-use PHPUnit\Xpath\Assert as XpathAssertions;
-use PHPUnit\Xpath\Constraint as XpathConstraints;
+use PHPUnit\Xpath\AssertTrait as XpathAssertions;
+use PHPUnit\Xpath\ConstraintTrait as XpathConstraints;
 
 class MyProjectExampleTest extends \PHPUnit\Framework\TestCase
 {
@@ -62,7 +62,7 @@ class MyProjectExampleTest extends \PHPUnit\Framework\TestCase
 
 ### Constraints
 
-Use trait `PHPUnit\Xpath\Constraint`. They can be used with `assertThat()` or
+Use trait `PHPUnit\Xpath\ConstraintTrait`. They can be used with `assertThat()` or
 with Mocks.
 
 #### self::matchesXpathExpression()
@@ -159,7 +159,7 @@ public function testCompareChildElementFromDocumentAsString()
 
 ### Assertions
 
-Use trait `PHPUnit\Xpath\Assert`. These assertions are shortcuts for
+Use trait `PHPUnit\Xpath\AssertTrait`. These assertions are shortcuts for
 `assertThat()`.
 
 * self::assertXpathMatch()
