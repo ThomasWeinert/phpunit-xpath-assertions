@@ -21,6 +21,8 @@ jobs:
             composer-args: ""
           - version: "8.4"
             composer-args: ""
+          - version: "8.5"
+            composer-args: ""
         prefer-lowest: ["", "--prefer-lowest"]
     name: Unit Tests - PHP ${{ matrix.php.version }} ${{ matrix.prefer-lowest }}
     steps:
